@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #faf8f4;
+  --color-paper: #ffffff;
+  --color-ink: #1c2b2a;
+  --color-ink-soft: #5c6b6a;
+  --color-line: #e6e2d8;
+
+  --color-teal-50: #f0faf8;
+  --color-teal-100: #d5f0eb;
+  --color-teal-200: #a8e0d6;
+  --color-teal-600: #0d7a6c;
+  --color-teal-700: #0a6358;
+  --color-teal-800: #084d45;
+  --color-teal-900: #063b35;
+
+  --color-amber-soft: #fdf4e3;
+  --color-amber-strong: #b45309;
+  --color-danger-soft: #fdecea;
+  --color-danger: #b91c1c;
+
+  --font-sans: var(--font-anuphan), "Anuphan", "Noto Sans Thai", sans-serif;
+  --font-print: var(--font-sarabun), "Sarabun", "Noto Sans Thai", serif;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-feature-settings: "tnum";
+}
+
+/* subtle dotted texture for depth on the app background */
+.bg-grain {
+  background-image: radial-gradient(rgba(13, 122, 108, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+::selection {
+  background: var(--color-teal-200);
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+  /* hide the app chrome; show only the receipt */
+  main {
+    padding: 0 !important;
+  }
+  .bg-grain {
+    background-image: none;
+  }
+}
+
+@page {
+  size: A5;
+  margin: 12mm;
+}
