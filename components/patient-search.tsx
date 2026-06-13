@@ -36,7 +36,7 @@ export function PatientSearch({
         onChange={(e) => runSearch(e.target.value)}
         autoFocus={autoFocus}
         placeholder="ค้นหาด้วย HN / ชื่อ / เบอร์โทร / เลขบัตรประชาชน"
-        className="w-full rounded-lg border border-line bg-cream px-4 py-3 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200"
+        className="field px-3 py-2.5"
       />
 
       {searching && <p className="mt-3 text-sm text-ink-soft">กำลังค้นหา…</p>}
@@ -46,27 +46,25 @@ export function PatientSearch({
       )}
 
       {results && results.length > 0 && (
-        <ul className="mt-3 divide-y divide-line overflow-hidden rounded-xl border border-line bg-paper">
+        <ul className="mt-3 divide-y divide-line-soft overflow-hidden rounded-md border border-line bg-paper">
           {results.map((p) => {
             const age = ageYears(p.dob);
             return (
-              <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-teal-50/60">
+              <li key={p.id} className="flex items-center justify-between gap-3 px-3 py-2.5 hover:bg-teal-50/60">
                 <div>
-                  <span className="font-semibold tabular-nums text-teal-800">{p.hn}</span>
+                  <span className="font-semibold tabular-nums text-teal-700">{p.hn}</span>
                   <span className="ml-3 font-medium">{fullName(p)}</span>
                   <span className="ml-2 text-sm text-ink-soft">
                     {age !== null && `${age} ปี`} {p.phone && `· ${p.phone}`}
                   </span>
                   {p.allergies && (
-                    <span className="ml-2 rounded bg-danger-soft px-1.5 py-0.5 text-xs font-medium text-danger">
-                      แพ้: {p.allergies}
-                    </span>
+                    <span className="chip ml-2 bg-danger-soft text-danger">แพ้: {p.allergies}</span>
                   )}
                 </div>
                 <button
                   disabled={picking}
                   onClick={() => startPick(async () => void (await onPick(p)))}
-                  className="shrink-0 rounded-lg bg-teal-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
+                  className="btn-primary shrink-0"
                 >
                   {pickLabel}
                 </button>

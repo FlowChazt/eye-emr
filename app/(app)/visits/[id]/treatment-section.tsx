@@ -26,8 +26,7 @@ type Med = {
   stockQty: number;
 };
 
-const field =
-  "rounded-lg border border-line bg-cream px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200";
+const field = "field";
 
 export function TreatmentSection({
   visitId,
@@ -96,40 +95,40 @@ export function TreatmentSection({
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold">การรักษา / ยา</h2>
+    <section className="card p-4">
+      <h2 className="mb-3 text-sm font-semibold tracking-wide text-ink-soft uppercase">การรักษา / ยา</h2>
 
       {/* item list */}
       {items.length > 0 && (
-        <table className="mb-4 w-full text-[15px]">
+        <table className="mb-4 w-full text-[13px]">
           <thead>
-            <tr className="border-b border-line text-left text-sm text-ink-soft">
-              <th className="py-2 font-medium">รายการ</th>
-              <th className="py-2 text-right font-medium">จำนวน</th>
-              <th className="py-2 text-right font-medium">ราคา/หน่วย</th>
-              <th className="py-2 text-right font-medium">รวม</th>
-              {!readOnly && <th className="w-10" />}
+            <tr className="border-b border-line text-left text-xs font-medium tracking-wide text-ink-soft uppercase">
+              <th className="py-1.5 font-medium">รายการ</th>
+              <th className="py-1.5 text-right font-medium">จำนวน</th>
+              <th className="py-1.5 text-right font-medium">ราคา/หน่วย</th>
+              <th className="py-1.5 text-right font-medium">รวม</th>
+              {!readOnly && <th className="w-8" />}
             </tr>
           </thead>
           <tbody>
             {items.map((it) => (
-              <tr key={it.id} className="border-b border-line/60 last:border-0">
-                <td className="py-2">
+              <tr key={it.id} className="border-b border-line-soft last:border-0">
+                <td className="py-1.5">
                   {it.description}
                   {it.type === "custom" && (
-                    <span className="ml-2 rounded bg-teal-100 px-1.5 py-0.5 text-xs text-teal-800">อื่นๆ</span>
+                    <span className="chip ml-2 bg-teal-100 text-teal-800">อื่นๆ</span>
                   )}
                 </td>
-                <td className="py-2 text-right tabular-nums">{it.qty}</td>
-                <td className="py-2 text-right tabular-nums">{baht(it.unitPrice)}</td>
-                <td className="py-2 text-right font-medium tabular-nums">{baht(it.lineTotal)}</td>
+                <td className="py-1.5 text-right tabular-nums">{it.qty}</td>
+                <td className="py-1.5 text-right tabular-nums">{baht(it.unitPrice)}</td>
+                <td className="py-1.5 text-right font-medium tabular-nums">{baht(it.lineTotal)}</td>
                 {!readOnly && (
-                  <td className="py-2 text-right">
+                  <td className="py-1.5 text-right">
                     <button
                       onClick={() => run(() => removeVisitItem(visitId, it.id))}
                       disabled={pending}
                       title="ลบรายการ"
-                      className="rounded px-2 py-1 text-ink-soft hover:bg-danger-soft hover:text-danger"
+                      className="rounded px-1.5 py-0.5 text-ink-soft hover:bg-danger-soft hover:text-danger"
                     >
                       ✕
                     </button>
@@ -140,10 +139,10 @@ export function TreatmentSection({
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={3} className="pt-3 text-right font-semibold">
+              <td colSpan={3} className="pt-2.5 text-right text-sm font-semibold">
                 รวมทั้งหมด
               </td>
-              <td className="pt-3 text-right text-lg font-bold tabular-nums text-teal-800">
+              <td className="pt-2.5 text-right text-base font-bold tabular-nums text-teal-800">
                 {baht(total)} ฿
               </td>
               {!readOnly && <td />}
@@ -153,7 +152,7 @@ export function TreatmentSection({
       )}
 
       {items.length === 0 && (
-        <p className="mb-4 rounded-xl border border-dashed border-line p-6 text-center text-sm text-ink-soft">
+        <p className="mb-4 rounded-md border border-dashed border-line p-5 text-center text-sm text-ink-soft">
           ยังไม่มีรายการรักษา
         </p>
       )}
@@ -161,8 +160,8 @@ export function TreatmentSection({
       {!readOnly && (
         <div className="space-y-4">
           {/* medication picker */}
-          <div className="rounded-xl bg-cream p-4">
-            <p className="mb-2 text-sm font-semibold">เพิ่มยาจากสต็อก</p>
+          <div className="rounded-md border border-line-soft bg-cream p-3">
+            <p className="mb-2 text-xs font-semibold tracking-wide text-ink-soft uppercase">เพิ่มยาจากสต็อก</p>
             <div className="relative flex flex-wrap items-start gap-2">
               <div className="relative min-w-64 flex-1">
                 <input
@@ -172,10 +171,10 @@ export function TreatmentSection({
                     setMedQuery(e.target.value);
                   }}
                   placeholder="พิมพ์ชื่อยา…"
-                  className={`${field} w-full bg-paper`}
+                  className={`${field} w-full`}
                 />
                 {matches.length > 0 && (
-                  <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-line bg-paper shadow-lg">
+                  <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-line bg-paper shadow-lg">
                     {matches.map((m) => (
                       <li key={m.id}>
                         <button
@@ -184,10 +183,10 @@ export function TreatmentSection({
                             setSelectedMed(m);
                             setMedQty("1");
                           }}
-                          className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-teal-50"
+                          className="flex w-full items-center justify-between px-3 py-1.5 text-left text-sm hover:bg-teal-50"
                         >
                           <span>{m.name}</span>
-                          <span className={`text-sm tabular-nums ${m.stockQty <= 0 ? "text-danger" : "text-ink-soft"}`}>
+                          <span className={`text-xs tabular-nums ${m.stockQty <= 0 ? "text-danger" : "text-ink-soft"}`}>
                             {baht(m.price)} ฿/{m.unit} · เหลือ {m.stockQty}
                           </span>
                         </button>
@@ -203,18 +202,18 @@ export function TreatmentSection({
                 min="0"
                 step="any"
                 placeholder="จำนวน"
-                className={`${field} w-24 bg-paper tabular-nums`}
+                className={`${field} w-24 tabular-nums`}
               />
               <button
                 onClick={addMed}
                 disabled={pending || !selectedMed || !(qtyNum > 0)}
-                className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-800 disabled:opacity-40"
+                className="btn-primary"
               >
                 เพิ่ม
               </button>
             </div>
             {selectedMed && previewTotal !== null && (
-              <p className="mt-2 text-sm text-ink-soft">
+              <p className="mt-2 text-xs text-ink-soft">
                 {selectedMed.name} × {qtyNum} {selectedMed.unit} ={" "}
                 <span className="font-semibold text-ink">{baht(previewTotal)} ฿</span>
                 {qtyNum > selectedMed.stockQty && (
@@ -225,14 +224,14 @@ export function TreatmentSection({
           </div>
 
           {/* custom item */}
-          <div className="rounded-xl bg-cream p-4">
-            <p className="mb-2 text-sm font-semibold">การรักษาอื่นๆ / ค่าบริการ</p>
+          <div className="rounded-md border border-line-soft bg-cream p-3">
+            <p className="mb-2 text-xs font-semibold tracking-wide text-ink-soft uppercase">การรักษาอื่นๆ / ค่าบริการ</p>
             <div className="flex flex-wrap gap-2">
               <input
                 value={customDesc}
                 onChange={(e) => setCustomDesc(e.target.value)}
                 placeholder="เช่น ค่าตรวจ, ทำแผล, ฉีดยา…"
-                className={`${field} min-w-64 flex-1 bg-paper`}
+                className={`${field} min-w-64 flex-1`}
               />
               <input
                 value={customPrice}
@@ -241,38 +240,38 @@ export function TreatmentSection({
                 min="0"
                 step="any"
                 placeholder="ราคา (฿)"
-                className={`${field} w-28 bg-paper tabular-nums`}
+                className={`${field} w-28 tabular-nums`}
               />
               <button
                 onClick={addCustom}
                 disabled={pending || !customDesc.trim() || !(Number(customPrice) >= 0) || customPrice === ""}
-                className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-800 disabled:opacity-40"
+                className="btn-primary"
               >
                 เพิ่ม
               </button>
             </div>
           </div>
 
-          {error && <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
+          {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
 
           {/* checkout */}
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-line pt-4">
-            <span className="mr-auto text-sm text-ink-soft">
+          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line pt-4">
+            <span className="mr-auto text-xs text-ink-soft">
               ปิด visit จะหักสต็อกยาและออกใบเสร็จ — แก้ไขไม่ได้หลังปิด
             </span>
             <button
               onClick={() => run(() => completeVisit(visitId, "cash"))}
               disabled={pending}
-              className="rounded-lg bg-teal-700 px-5 py-2.5 font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
+              className="btn-primary px-4 py-2"
             >
-              💵 ปิด visit · เงินสด {baht(total)} ฿
+              ปิด visit · เงินสด {baht(total)} ฿
             </button>
             <button
               onClick={() => run(() => completeVisit(visitId, "transfer"))}
               disabled={pending}
-              className="rounded-lg border border-teal-700 px-5 py-2.5 font-semibold text-teal-800 hover:bg-teal-50 disabled:opacity-50"
+              className="btn px-4 py-2 border border-teal-700 text-teal-800 hover:bg-teal-50"
             >
-              📱 ปิด visit · เงินโอน
+              ปิด visit · เงินโอน
             </button>
           </div>
         </div>

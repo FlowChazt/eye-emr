@@ -4,14 +4,22 @@ import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
 import { logout } from "@/app/login/actions";
 import { NavLink } from "@/components/nav-link";
+import { GlobalSearch } from "@/components/global-search";
 import { ClinicLogo } from "@/components/clinic-logo";
+import {
+  WorklistIcon,
+  PatientsIcon,
+  StockIcon,
+  ReportsIcon,
+  SettingsIcon,
+} from "@/components/icons";
 
 const NAV = [
-  { href: "/", label: "คลินิก", icon: "🏥" },
-  { href: "/patients", label: "ผู้ป่วย", icon: "🪪" },
-  { href: "/stock", label: "สต็อกยา", icon: "💊" },
-  { href: "/reports", label: "รายงาน", icon: "📊" },
-  { href: "/settings", label: "ตั้งค่า", icon: "⚙️" },
+  { href: "/", label: "งานวันนี้", icon: <WorklistIcon /> },
+  { href: "/patients", label: "ผู้ป่วย", icon: <PatientsIcon /> },
+  { href: "/stock", label: "สต็อกยา", icon: <StockIcon /> },
+  { href: "/reports", label: "รายงาน", icon: <ReportsIcon /> },
+  { href: "/settings", label: "ตั้งค่า", icon: <SettingsIcon /> },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,30 +29,44 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     "Eye Clinic";
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="no-print sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-teal-800 bg-teal-900 text-teal-100">
-        <Link href="/" className="flex items-center gap-3 px-5 py-5">
-          <ClinicLogo size={40} variant="dark" className="shrink-0" />
-          <span className="text-base leading-tight font-bold text-white">{clinicName}</span>
-        </Link>
+    <div className="min-h-screen">
+      <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 lg:gap-5 lg:px-6">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <ClinicLogo size={30} className="shrink-0" />
+            <span className="hidden text-[15px] leading-tight font-bold whitespace-nowrap text-teal-900 lg:inline">
+              {clinicName}
+            </span>
+          </Link>
 
-        <nav className="flex-1 space-y-1 px-3">
+          <nav className="hidden shrink-0 items-center gap-5 md:flex">
+            {NAV.map((item) => (
+              <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />
+            ))}
+          </nav>
+
+          <div className="ml-auto flex min-w-0 items-center gap-3 lg:gap-4">
+            <GlobalSearch />
+            <div className="hidden shrink-0 items-center gap-3 sm:flex">
+              <span className="whitespace-nowrap text-sm text-ink-soft">{user.displayName}</span>
+              <form action={logout}>
+                <button className="whitespace-nowrap text-sm font-medium text-ink-soft underline-offset-2 hover:text-teal-800 hover:underline">
+                  ออกจากระบบ
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* compact nav for small screens */}
+        <nav className="flex items-center gap-5 overflow-x-auto border-t border-line-soft px-4 md:hidden">
           {NAV.map((item) => (
             <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />
           ))}
         </nav>
+      </header>
 
-        <div className="border-t border-teal-800 p-4">
-          <p className="mb-2 truncate text-sm text-teal-200">{user.displayName}</p>
-          <form action={logout}>
-            <button className="text-sm text-teal-300 underline-offset-2 hover:text-white hover:underline">
-              ออกจากระบบ
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      <main className="bg-grain min-h-screen flex-1 p-6 lg:p-8">{children}</main>
+      <main className="mx-auto max-w-6xl p-4 lg:p-6">{children}</main>
     </div>
   );
 }

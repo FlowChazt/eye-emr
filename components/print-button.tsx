@@ -1,12 +1,11 @@
 "use client";
 
+import { PrintIcon } from "./icons";
+
 export function PrintButton() {
   return (
-    <button
-      onClick={() => window.print()}
-      className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-800"
-    >
-      🖨️ พิมพ์
+    <button onClick={() => window.print()} className="btn-primary px-4 py-2">
+      <PrintIcon size={16} /> พิมพ์
     </button>
   );
 }

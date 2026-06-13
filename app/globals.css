@@ -1,43 +1,109 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #faf8f4;
+  /* warm-white surfaces */
+  --color-cream: #f7f5f0;
   --color-paper: #ffffff;
-  --color-ink: #1c2b2a;
-  --color-ink-soft: #5c6b6a;
-  --color-line: #e6e2d8;
+  --color-ink: #16211f;
+  --color-ink-soft: #5a6967;
+  --color-line: #e3e0d6;
+  --color-line-soft: #eeece4;
 
-  --color-teal-50: #f0faf8;
-  --color-teal-100: #d5f0eb;
-  --color-teal-200: #a8e0d6;
-  --color-teal-600: #0d7a6c;
-  --color-teal-700: #0a6358;
-  --color-teal-800: #084d45;
-  --color-teal-900: #063b35;
+  /* teal — deepened, fuller scale (less pastel) */
+  --color-teal-50: #eef7f4;
+  --color-teal-100: #d3ebe4;
+  --color-teal-200: #a6d6c9;
+  --color-teal-300: #6fbaa9;
+  --color-teal-400: #3f9885;
+  --color-teal-500: #1f7c6c;
+  --color-teal-600: #0d6a5c;
+  --color-teal-700: #0a564b;
+  --color-teal-800: #08433a;
+  --color-teal-900: #06322c;
 
-  --color-amber-soft: #fdf4e3;
-  --color-amber-strong: #b45309;
-  --color-danger-soft: #fdecea;
-  --color-danger: #b91c1c;
+  --color-gold: #c8a24a;
+
+  --color-amber-soft: #fbf1dd;
+  --color-amber-strong: #9a5d09;
+  --color-danger-soft: #fbeae8;
+  --color-danger: #b3261e;
 
   --font-sans: var(--font-anuphan), "Anuphan", "Noto Sans Thai", sans-serif;
   --font-print: var(--font-sarabun), "Sarabun", "Noto Sans Thai", serif;
+
+  /* tighter radii than the old rounded-2xl look */
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
 body {
   background: var(--color-cream);
   color: var(--color-ink);
   font-feature-settings: "tnum";
-}
-
-/* subtle dotted texture for depth on the app background */
-.bg-grain {
-  background-image: radial-gradient(rgba(13, 122, 108, 0.05) 1px, transparent 1px);
-  background-size: 24px 24px;
+  font-size: 14px;
 }
 
 ::selection {
   background: var(--color-teal-200);
+}
+
+/* ------------------------------------------------------------------ */
+/* Refined component primitives — shared across screens for a coherent  */
+/* clinical look (sharp corners, hairline borders, restrained shadow). */
+/* ------------------------------------------------------------------ */
+@layer components {
+  .card {
+    @apply rounded-md border border-line bg-paper;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5
+      text-sm font-medium transition disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5
+      text-sm font-medium transition disabled:opacity-50
+      bg-teal-700 text-white hover:bg-teal-800;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5
+      text-sm font-medium transition disabled:opacity-50
+      border border-line bg-paper text-ink hover:bg-cream;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5
+      text-sm font-medium transition disabled:opacity-50
+      text-danger hover:bg-danger-soft;
+  }
+
+  .field {
+    @apply w-full rounded-md border border-line bg-white px-2.5 py-1.5 text-sm
+      outline-none transition placeholder:text-ink-soft/70
+      focus:border-teal-600 focus:ring-2 focus:ring-teal-100
+      disabled:bg-cream disabled:text-ink-soft;
+  }
+
+  /* small flat status pill */
+  .chip {
+    @apply inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium;
+  }
+
+  /* dense data table */
+  .data-table {
+    @apply w-full text-[13px];
+  }
+  .data-table thead tr {
+    @apply border-b border-line bg-cream text-left text-xs font-medium tracking-wide text-ink-soft uppercase;
+  }
+  .data-table th {
+    @apply px-3 py-2 font-medium;
+  }
+  .data-table td {
+    @apply px-3 py-2;
+  }
+  .data-table tbody tr {
+    @apply border-b border-line-soft last:border-0;
+  }
 }
 
 /* keep letterhead colors (gold rules, cream total band) on paper */
@@ -53,16 +119,17 @@ body {
   .no-print {
     display: none !important;
   }
-  /* hide the app chrome; show only the receipt */
+  /* hide the app chrome; show only the document */
   main {
     padding: 0 !important;
   }
-  .bg-grain {
-    background-image: none;
+  /* anchor printed-document type so screen preview matches paper */
+  .print-doc {
+    font-size: 12px;
   }
 }
 
 @page {
   size: A5;
-  margin: 12mm;
+  margin: 10mm;
 }

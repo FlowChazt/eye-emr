@@ -26,35 +26,35 @@ export function HistoryPanel({
   itemsByVisit: Map<number, VisitItem[]>;
 }) {
   return (
-    <section className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">ประวัติการรักษาที่ผ่านมา</h2>
+    <section className="card p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold tracking-wide text-ink-soft uppercase">ประวัติการรักษาที่ผ่านมา</h2>
         <Link href={`/patients/${patientHn}`} className="text-sm font-medium text-teal-700 hover:underline">
           เปิดหน้า EMR เต็ม →
         </Link>
       </div>
 
       {visits.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-line bg-cream/60 p-8 text-center text-ink-soft">
+        <p className="rounded-md border border-dashed border-line bg-cream/60 p-6 text-center text-sm text-ink-soft">
           ยังไม่มีประวัติการรักษาครั้งก่อน
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-2">
           {visits.map((v, i) => {
             const items = itemsByVisit.get(v.id) ?? [];
             const total = items.reduce((s, it) => s + it.lineTotal, 0);
             const vitals = vitalsLine(v);
             return (
               <li key={v.id}>
-                <details open={i === 0} className="group rounded-xl border border-line bg-cream/40">
-                  <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 rounded-xl px-4 py-3 hover:bg-teal-50/60">
+                <details open={i === 0} className="group rounded-md border border-line bg-cream/40">
+                  <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2.5 text-sm hover:bg-teal-50/60">
                     <span>
                       <span className="font-semibold">{thaiDate(v.visitDate)}</span>
                       <span className="ml-3 text-ink-soft">{v.diagnosis || v.chiefComplaint || "ไม่ระบุ"}</span>
                     </span>
                     <span className="text-sm text-ink-soft">{VISIT_STATUS_LABEL[v.status]}</span>
                   </summary>
-                  <div className="space-y-3 border-t border-line/60 px-4 py-3 text-[15px]">
+                  <div className="space-y-2.5 border-t border-line-soft px-3 py-2.5 text-sm">
                     {vitals && <p className="text-sm tabular-nums text-ink-soft">{vitals}</p>}
                     {v.chiefComplaint && (
                       <p>

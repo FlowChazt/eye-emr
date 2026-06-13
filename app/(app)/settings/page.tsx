@@ -22,7 +22,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold text-teal-900">ตั้งค่า</h1>
+      <h1 className="mb-4 text-lg font-bold text-teal-900">ตั้งค่า</h1>
       <SettingsClient settings={settings} users={users} myUserId={me.userId} />
     </div>
   );

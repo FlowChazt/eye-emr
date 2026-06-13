@@ -16,8 +16,7 @@ type Visit = {
   diagnosis: string | null;
 };
 
-const field =
-  "w-full rounded-lg border border-line bg-cream px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200 disabled:bg-paper disabled:text-ink-soft";
+const field = "field";
 
 export function VisitRecordForm({ visit, readOnly }: { visit: Visit; readOnly: boolean }) {
   const [saving, startSaving] = useTransition();
@@ -31,16 +30,13 @@ export function VisitRecordForm({ visit, readOnly }: { visit: Visit; readOnly: b
   }
 
   return (
-    <form action={onSubmit} className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">บันทึกการตรวจ</h2>
+    <form action={onSubmit} className="card p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-semibold tracking-wide text-ink-soft uppercase">บันทึกการตรวจ</h2>
         {!readOnly && (
           <div className="flex items-center gap-3">
-            {savedAt && <span className="text-sm text-ink-soft">บันทึกแล้ว {savedAt}</span>}
-            <button
-              disabled={saving}
-              className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
-            >
+            {savedAt && <span className="text-xs text-ink-soft">บันทึกแล้ว {savedAt}</span>}
+            <button disabled={saving} className="btn-primary">
               {saving ? "กำลังบันทึก…" : "บันทึก"}
             </button>
           </div>

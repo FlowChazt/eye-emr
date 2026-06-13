@@ -27,33 +27,33 @@ export function PrintDoc({
   footnote?: string;
 }) {
   return (
-    <div className="print-doc relative overflow-hidden border-2 border-teal-900 bg-white p-1 font-print text-[15px] leading-relaxed text-ink shadow-sm print:shadow-none">
-      <div className="relative flex min-h-[150mm] flex-col border border-teal-900/60 px-8 py-6">
+    <div className="print-doc relative overflow-hidden border-2 border-teal-900 bg-white p-1 font-print text-[12px] leading-relaxed text-ink shadow-sm print:shadow-none">
+      <div className="relative flex min-h-[150mm] flex-col border border-teal-900/60 px-6 py-5">
         {/* watermark */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.045]" aria-hidden>
-          <ClinicLogo size={340} />
+          <ClinicLogo size={300} />
         </div>
 
         {/* letterhead */}
-        <header className="relative flex items-center gap-4">
-          <ClinicLogo size={62} className="shrink-0" />
+        <header className="relative flex items-center gap-3">
+          <ClinicLogo size={52} className="shrink-0" />
           <div className="min-w-0">
-            <p className="text-xl font-bold text-teal-900">{clinicName}</p>
-            {clinicAddress && <p className="text-[13px] text-ink-soft">{clinicAddress}</p>}
-            {clinicPhone && <p className="text-[13px] text-ink-soft">โทร. {clinicPhone}</p>}
+            <p className="text-lg font-bold text-teal-900">{clinicName}</p>
+            {clinicAddress && <p className="text-[11px] text-ink-soft">{clinicAddress}</p>}
+            {clinicPhone && <p className="text-[11px] text-ink-soft">โทร. {clinicPhone}</p>}
           </div>
         </header>
 
-        <div className="relative mt-3 mb-4 border-b-[3px] border-double border-[#c8a24a]" />
+        <div className="relative mt-2.5 mb-3 border-b-[3px] border-double border-[#c8a24a]" />
 
         {/* title band */}
         <div className="relative mb-1 text-center">
-          <h1 className="text-lg font-bold tracking-wide text-teal-900">{title}</h1>
-          {titleEn && <p className="text-[12px] tracking-[0.25em] text-ink-soft uppercase">{titleEn}</p>}
+          <h1 className="text-base font-bold tracking-wide text-teal-900">{title}</h1>
+          {titleEn && <p className="text-[11px] tracking-[0.25em] text-ink-soft uppercase">{titleEn}</p>}
         </div>
 
         {meta && meta.length > 0 && (
-          <div className="relative mb-3 flex justify-end gap-6 text-[13.5px]">
+          <div className="relative mb-3 flex justify-end gap-6 text-[12px]">
             {meta.map((m) => (
               <p key={m.label}>
                 {m.label} <span className="font-semibold tabular-nums">{m.value}</span>
@@ -67,15 +67,15 @@ export function PrintDoc({
 
         {/* signature */}
         {signature && (
-          <div className="relative mt-8 ml-auto w-56 text-center text-[14px]">
-            <p>ลงชื่อ ...................................................</p>
+          <div className="relative mt-7 ml-auto w-52 text-center text-[12px]">
+            <p>ลงชื่อ ...............................................</p>
             {signature.name && <p className="mt-1">( {signature.name} )</p>}
             <p className="text-ink-soft">{signature.role}</p>
           </div>
         )}
 
         {footnote && (
-          <p className="relative mt-5 border-t border-line pt-2 text-[12.5px] text-ink-soft">{footnote}</p>
+          <p className="relative mt-4 border-t border-line pt-2 text-[11px] text-ink-soft">{footnote}</p>
         )}
       </div>
     </div>

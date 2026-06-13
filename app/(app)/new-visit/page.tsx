@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
+import { BackButton } from "@/components/back-button";
 import { NewVisitClient } from "./new-visit-client";
 
 export default async function NewVisitPage({
@@ -24,7 +25,8 @@ export default async function NewVisitPage({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold text-teal-900">เปิด visit ใหม่</h1>
+      <BackButton />
+      <h1 className="mb-4 text-lg font-bold text-teal-900">เปิด visit ใหม่</h1>
       <NewVisitClient fromAppointment={fromAppointment} />
     </div>
   );

@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
-import { ageYears, fullName, thaiDate, VISIT_STATUS_LABEL } from "@/lib/format";
+import { thaiDate, VISIT_STATUS_LABEL } from "@/lib/format";
+import { PatientBanner } from "@/components/patient-banner";
+import { BackButton } from "@/components/back-button";
+import { PlusIcon, PrintIcon } from "@/components/icons";
 import { openVisitAndGo } from "../actions";
 import { cancelAppointment } from "@/app/(app)/appointments/actions";
-
-const SEX_LABEL: Record<string, string> = { male: "ชาย", female: "หญิง", other: "อื่นๆ" };
 
 export default async function PatientPage({ params }: { params: Promise<{ hn: string }> }) {
   await requireUser();
@@ -30,7 +31,6 @@ export default async function PatientPage({ params }: { params: Promise<{ hn: st
     .orderBy(asc(tables.appointments.date))
     .all();
 
-  const age = ageYears(patient.dob);
   const openVisit = openVisitAndGo.bind(null, patient.id, undefined);
 
   async function cancelAppt(appointmentId: number) {
@@ -40,53 +40,46 @@ export default async function PatientPage({ params }: { params: Promise<{ hn: st
 
   return (
     <div className="mx-auto max-w-4xl">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold tabular-nums text-teal-700">HN {patient.hn}</p>
-          <h1 className="text-2xl font-bold text-teal-900">{fullName(patient)}</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            {patient.sex && SEX_LABEL[patient.sex]}
-            {age !== null && <> · {age} ปี</>}
-            {patient.dob && <> · เกิด {thaiDate(patient.dob)}</>}
+      <BackButton fallbackHref="/patients" />
+
+      <PatientBanner
+        patient={patient}
+        context={
+          <>
+            {patient.dob && <>เกิด {thaiDate(patient.dob)}</>}
             {patient.phone && <> · {patient.phone}</>}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href={`/patients/${patient.hn}/edit`}
-            className="rounded-lg border border-line bg-paper px-4 py-2 font-medium hover:bg-cream"
-          >
-            แก้ไขข้อมูล
-          </Link>
-          <form action={openVisit}>
-            <button className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-800">
-              + เปิด visit
-            </button>
-          </form>
-        </div>
-      </header>
+          </>
+        }
+        actions={
+          <>
+            <Link href={`/patients/${patient.hn}/edit`} className="btn-ghost">
+              แก้ไขข้อมูล
+            </Link>
+            <form action={openVisit}>
+              <button className="btn-primary">
+                <PlusIcon size={16} /> เปิด visit
+              </button>
+            </form>
+          </>
+        }
+      />
 
       {scheduledAppts.length > 0 && (
-        <div className="mb-5 rounded-xl border border-amber-strong/20 bg-amber-soft px-4 py-3">
-          <p className="mb-1 text-sm font-bold text-amber-strong">นัดหมายที่จะมาถึง</p>
+        <div className="mb-4 rounded-md border border-amber-strong/20 bg-amber-soft px-4 py-3">
+          <p className="mb-1.5 text-xs font-bold tracking-wide text-amber-strong uppercase">นัดหมายที่จะมาถึง</p>
           <ul className="space-y-1.5">
             {scheduledAppts.map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center justify-between gap-2">
+              <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
                 <p>
-                  📅 <span className="font-semibold">{thaiDate(a.date)}</span>
+                  <span className="font-semibold">{thaiDate(a.date)}</span>
                   {a.note && <span className="ml-2 text-ink-soft">· {a.note}</span>}
                 </p>
                 <div className="flex items-center gap-2">
-                  <Link
-                    href={`/appointments/${a.id}/print`}
-                    className="rounded-lg border border-line bg-paper px-3 py-1 text-sm font-medium hover:bg-cream"
-                  >
-                    🖨️ ใบนัด
+                  <Link href={`/appointments/${a.id}/print`} className="btn-ghost">
+                    <PrintIcon size={15} /> ใบนัด
                   </Link>
                   <form action={cancelAppt.bind(null, a.id)}>
-                    <button className="rounded-lg px-3 py-1 text-sm font-medium text-danger hover:bg-danger-soft">
-                      ยกเลิก
-                    </button>
+                    <button className="btn-danger">ยกเลิก</button>
                   </form>
                 </div>
               </li>
@@ -95,45 +88,37 @@ export default async function PatientPage({ params }: { params: Promise<{ hn: st
         </div>
       )}
 
-      {patient.allergies && (
-        <div className="mb-5 flex items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3">
-          <span className="text-xl" aria-hidden>⚠️</span>
-          <div>
-            <p className="text-sm font-bold text-danger">ประวัติแพ้ยา/แพ้อาหาร</p>
-            <p className="text-danger">{patient.allergies}</p>
-          </div>
-        </div>
-      )}
-
-      <div className="mb-6 grid grid-cols-1 gap-3 text-[15px] sm:grid-cols-2">
-        <div className="rounded-xl border border-line bg-paper p-4">
-          <p className="text-sm font-medium text-ink-soft">โรคประจำตัว</p>
+      <div className="mb-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <div className="card p-3">
+          <p className="mb-0.5 text-xs font-medium tracking-wide text-ink-soft uppercase">โรคประจำตัว</p>
           <p>{patient.chronicConditions || "-"}</p>
         </div>
-        <div className="rounded-xl border border-line bg-paper p-4">
-          <p className="text-sm font-medium text-ink-soft">ที่อยู่</p>
+        <div className="card p-3">
+          <p className="mb-0.5 text-xs font-medium tracking-wide text-ink-soft uppercase">ที่อยู่</p>
           <p>{patient.address || "-"}</p>
         </div>
         {patient.notes && (
-          <div className="rounded-xl border border-line bg-paper p-4 sm:col-span-2">
-            <p className="text-sm font-medium text-ink-soft">หมายเหตุ</p>
+          <div className="card p-3 sm:col-span-2">
+            <p className="mb-0.5 text-xs font-medium tracking-wide text-ink-soft uppercase">หมายเหตุ</p>
             <p>{patient.notes}</p>
           </div>
         )}
       </div>
 
-      <h2 className="mb-3 text-lg font-semibold">ประวัติการรักษา ({visitRows.length} ครั้ง)</h2>
+      <h2 className="mb-2 text-sm font-semibold tracking-wide text-ink-soft uppercase">
+        ประวัติการรักษา ({visitRows.length} ครั้ง)
+      </h2>
       {visitRows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-line bg-paper/60 p-8 text-center text-ink-soft">
+        <p className="card border-dashed bg-paper/60 p-6 text-center text-sm text-ink-soft">
           ยังไม่มีประวัติการรักษา
         </p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="card divide-y divide-line-soft overflow-hidden">
           {visitRows.map((v) => (
             <li key={v.id}>
               <Link
                 href={`/visits/${v.id}`}
-                className="flex items-center justify-between rounded-xl border border-line bg-paper px-4 py-3 transition hover:border-teal-200 hover:bg-teal-50/60"
+                className="flex items-center justify-between px-4 py-2.5 text-sm transition hover:bg-teal-50/60"
               >
                 <div>
                   <span className="font-medium">{thaiDate(v.visitDate)}</span>
@@ -141,7 +126,7 @@ export default async function PatientPage({ params }: { params: Promise<{ hn: st
                     {v.diagnosis || v.chiefComplaint || "ไม่ระบุ"}
                   </span>
                 </div>
-                <span className="text-sm text-ink-soft">{VISIT_STATUS_LABEL[v.status]}</span>
+                <span className="text-xs text-ink-soft">{VISIT_STATUS_LABEL[v.status]}</span>
               </Link>
             </li>
           ))}

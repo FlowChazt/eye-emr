@@ -5,8 +5,8 @@ export default async function PatientsPage() {
   await requireUser();
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 text-2xl font-bold text-teal-900">ค้นหาผู้ป่วย</h1>
-      <div className="rounded-2xl border border-line bg-paper p-6 shadow-sm">
+      <h1 className="mb-4 text-lg font-bold text-teal-900">ค้นหาผู้ป่วย</h1>
+      <div className="card p-4">
         <PatientsSearchClient />
       </div>
     </div>

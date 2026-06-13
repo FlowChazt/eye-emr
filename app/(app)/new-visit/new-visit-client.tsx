@@ -24,14 +24,14 @@ export function NewVisitClient({ fromAppointment }: { fromAppointment: FromAppoi
   const [opening, startOpening] = useTransition();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {fromAppointment && (
-        <section className="rounded-2xl border-2 border-teal-200 bg-teal-50 p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-teal-900">ผู้ป่วยนัดหมาย</h2>
+        <section className="card border-teal-200 bg-teal-50 p-4">
+          <h2 className="mb-2 text-sm font-semibold tracking-wide text-teal-800 uppercase">ผู้ป่วยนัดหมาย</h2>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p>
-                <span className="font-semibold tabular-nums text-teal-800">{fromAppointment.patient.hn}</span>
+                <span className="font-semibold tabular-nums text-teal-700">{fromAppointment.patient.hn}</span>
                 <span className="ml-3 font-medium">{fullName(fromAppointment.patient)}</span>
                 <span className="ml-2 text-sm text-ink-soft">
                   {ageYears(fromAppointment.patient.dob) !== null && `${ageYears(fromAppointment.patient.dob)} ปี`}
@@ -53,7 +53,7 @@ export function NewVisitClient({ fromAppointment }: { fromAppointment: FromAppoi
                   await openVisitAndGo(fromAppointment.patient.id, fromAppointment.appt.id);
                 })
               }
-              className="rounded-lg bg-teal-700 px-5 py-2.5 font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
+              className="btn-primary px-5 py-2"
             >
               {opening ? "กำลังเปิด…" : "เปิด visit ผู้ป่วยนัด"}
             </button>
@@ -61,13 +61,13 @@ export function NewVisitClient({ fromAppointment }: { fromAppointment: FromAppoi
         </section>
       )}
 
-      <section className="rounded-2xl border border-line bg-paper p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold">ผู้ป่วยเดิม</h2>
+      <section className="card p-4">
+        <h2 className="mb-3 text-sm font-semibold tracking-wide text-ink-soft uppercase">ผู้ป่วยเดิม</h2>
         <PatientSearch pickLabel="เปิด visit" onPick={(p) => openVisitAndGo(p.id)} autoFocus={!fromAppointment} />
       </section>
 
-      <section className="rounded-2xl border border-line bg-paper p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold">ลงทะเบียนผู้ป่วยใหม่</h2>
+      <section className="card p-4">
+        <h2 className="mb-3 text-sm font-semibold tracking-wide text-ink-soft uppercase">ลงทะเบียนผู้ป่วยใหม่</h2>
         <PatientForm action={createPatient} submitLabel="ลงทะเบียน" openVisitOption />
       </section>
     </div>

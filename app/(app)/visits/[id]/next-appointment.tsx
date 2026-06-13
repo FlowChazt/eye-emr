@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { cancelAppointment, createAppointment } from "@/app/(app)/appointments/actions";
 import { thaiDate, todayISO } from "@/lib/format";
+import { PrintIcon } from "@/components/icons";
 
 type Appointment = {
   id: number;
@@ -11,8 +12,7 @@ type Appointment = {
   note: string | null;
 };
 
-const field =
-  "rounded-lg border border-line bg-cream px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200";
+const field = "field";
 
 function plusFromToday(days: number, months: number): string {
   const d = new Date();
@@ -63,32 +63,29 @@ export function NextAppointment({
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-paper p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold">นัดครั้งถัดไป</h2>
+    <section className="card p-4">
+      <h2 className="mb-3 text-sm font-semibold tracking-wide text-ink-soft uppercase">นัดครั้งถัดไป</h2>
 
       {appointments.length > 0 && (
         <ul className="mb-4 space-y-2">
           {appointments.map((a) => (
             <li
               key={a.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-strong/20 bg-amber-soft px-4 py-2.5"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-strong/20 bg-amber-soft px-3 py-2 text-sm"
             >
               <p>
-                📅 <span className="font-semibold">{thaiDate(a.date)}</span>
+                <span className="font-semibold">{thaiDate(a.date)}</span>
                 {a.note && <span className="ml-2 text-ink-soft">· {a.note}</span>}
               </p>
               <div className="flex items-center gap-2">
-                <Link
-                  href={`/appointments/${a.id}/print`}
-                  className="rounded-lg border border-line bg-paper px-3 py-1.5 text-sm font-medium hover:bg-cream"
-                >
-                  🖨️ พิมพ์ใบนัด
+                <Link href={`/appointments/${a.id}/print`} className="btn-ghost">
+                  <PrintIcon size={15} /> พิมพ์ใบนัด
                 </Link>
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => cancel(a.id)}
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-danger hover:bg-danger-soft disabled:opacity-50"
+                  className="btn-danger"
                 >
                   ยกเลิกนัด
                 </button>
@@ -100,7 +97,7 @@ export function NextAppointment({
 
       <form action={submit} className="flex flex-wrap items-end gap-3">
         <label>
-          <span className="mb-1 block text-sm font-medium">วันนัด</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">วันนัด</span>
           <input
             type="date"
             name="date"
@@ -117,14 +114,14 @@ export function NextAppointment({
               key={label}
               type="button"
               onClick={() => setDate(plusFromToday(days, months))}
-              className="rounded-lg border border-line bg-cream px-2.5 py-2 text-sm hover:bg-teal-50"
+              className="rounded-md border border-line bg-cream px-2.5 py-1.5 text-sm hover:bg-teal-50"
             >
               {label}
             </button>
           ))}
         </div>
         <label className="min-w-48 flex-1">
-          <span className="mb-1 block text-sm font-medium">นัดมาเพื่อ</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">นัดมาเพื่อ</span>
           <input
             name="note"
             placeholder="เช่น ติดตามอาการ / ฟังผลเลือด"
@@ -133,14 +130,11 @@ export function NextAppointment({
             className={`${field} w-full`}
           />
         </label>
-        <button
-          disabled={pending || !date}
-          className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white hover:bg-teal-800 disabled:opacity-50"
-        >
+        <button disabled={pending || !date} className="btn-primary">
           {pending ? "กำลังบันทึก…" : "ตั้งนัด"}
         </button>
       </form>
-      {error && <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
+      {error && <p className="mt-3 rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
     </section>
   );
 }

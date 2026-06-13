@@ -62,20 +62,20 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <DocField label="HN" value={patient.hn} className="w-36" />
         </div>
 
-        <table className="w-full border-collapse text-[14px]">
+        <table className="w-full border-collapse text-[12px]">
           <thead>
             <tr className="border-y-2 border-teal-900 text-teal-900">
               <th className="py-1.5 pr-2 text-left font-bold">รายการ</th>
-              <th className="w-16 py-1.5 text-right font-bold">จำนวน</th>
-              <th className="w-24 py-1.5 text-right font-bold">ราคา/หน่วย</th>
-              <th className="w-24 py-1.5 text-right font-bold">จำนวนเงิน</th>
+              <th className="w-10 py-1.5 text-right font-bold">จำนวน</th>
+              <th className="w-20 py-1.5 text-right font-bold">ราคา/หน่วย</th>
+              <th className="w-20 py-1.5 text-right font-bold">จำนวนเงิน</th>
             </tr>
           </thead>
           <tbody>
             {items.map((it, i) => (
               <tr key={it.id} className="border-b border-dotted border-ink/25">
                 <td className="py-1.5 pr-2">
-                  <span className="mr-2 inline-block w-5 text-right tabular-nums text-ink-soft">{i + 1}.</span>
+                  <span className="mr-1.5 inline-block w-4 text-right tabular-nums text-ink-soft">{i + 1}.</span>
                   {it.description}
                 </td>
                 <td className="py-1.5 text-right tabular-nums">{it.qty}</td>
@@ -87,15 +87,15 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         </table>
 
         <div className="mt-3 flex items-stretch border-2 border-teal-900">
-          <p className="flex-1 px-3 py-2 text-center text-[14px]">
+          <p className="flex-1 px-3 py-1.5 text-center text-[12px]">
             ({bahtText(payment.total)})
           </p>
-          <p className="flex items-center gap-3 border-l-2 border-teal-900 bg-cream px-4 py-2 font-bold">
-            รวมทั้งสิ้น <span className="text-base tabular-nums">{baht(payment.total)} บาท</span>
+          <p className="flex items-center gap-2 border-l-2 border-teal-900 bg-cream px-3 py-1.5 font-bold">
+            รวมทั้งสิ้น <span className="text-sm tabular-nums">{baht(payment.total)} บาท</span>
           </p>
         </div>
 
-        <p className="mt-3 text-[14px]">
+        <p className="mt-3 text-[12px]">
           ชำระโดย:{" "}
           <span className="font-medium">{payment.method === "cash" ? "เงินสด" : "เงินโอน"}</span>
         </p>

@@ -3,11 +3,12 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
 import { baht, fullName, thaiDate, timeHM, todayISO, VISIT_STATUS_LABEL } from "@/lib/format";
+import { PlusIcon } from "@/components/icons";
 
 const STATUS_CHIP: Record<string, string> = {
   waiting: "bg-amber-soft text-amber-strong",
   in_progress: "bg-teal-100 text-teal-800",
-  completed: "bg-line/60 text-ink-soft",
+  completed: "bg-line/70 text-ink-soft",
 };
 
 export default async function ClinicPage({
@@ -48,91 +49,88 @@ export default async function ClinicPage({
   const income = rows.reduce((s, r) => s + (r.payment?.total ?? 0), 0);
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-teal-900">
-            คลินิก{isToday ? "วันนี้" : ""} <span className="text-ink-soft">· {thaiDate(date)}</span>
+    <div>
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-lg font-bold text-teal-900">
+            งาน{isToday ? "วันนี้" : ""}
           </h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            รอตรวจ {waiting} · กำลังตรวจ {inProgress} · เสร็จสิ้น {completed}
-            {appts.length > 0 && <> · นัดหมาย {appts.length}</>}
-            {income > 0 && <> · รายรับ {baht(income)} บาท</>}
-          </p>
+          <span className="text-sm text-ink-soft">{thaiDate(date)}</span>
         </div>
-        <div className="flex items-center gap-3">
-          <form className="flex items-center gap-2">
-            <input
-              type="date"
-              name="date"
-              defaultValue={date}
-              className="rounded-lg border border-line bg-paper px-3 py-2 text-sm"
-            />
-            <button className="rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium hover:bg-cream">
-              ดู
-            </button>
+        <div className="flex items-center gap-2">
+          <form className="flex items-center gap-1.5">
+            <input type="date" name="date" defaultValue={date} className="field w-auto" />
+            <button className="btn-ghost">ดู</button>
           </form>
-          <Link
-            href="/new-visit"
-            className="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-teal-800"
-          >
-            + เปิด visit ใหม่
+          <Link href="/new-visit" className="btn-primary">
+            <PlusIcon size={16} /> เปิด visit ใหม่
           </Link>
         </div>
       </header>
 
+      {/* summary strip */}
+      <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+        <Stat label="รอตรวจ" value={waiting} tone="text-amber-strong" />
+        <Stat label="กำลังตรวจ" value={inProgress} tone="text-teal-700" />
+        <Stat label="เสร็จสิ้น" value={completed} tone="text-ink" />
+        {appts.length > 0 && <Stat label="นัดหมาย" value={appts.length} tone="text-ink-soft" />}
+        {income > 0 && (
+          <span className="ml-auto self-center text-sm text-ink-soft">
+            รายรับ <span className="font-semibold tabular-nums text-teal-800">{baht(income)}</span> บาท
+          </span>
+        )}
+      </div>
+
       {rows.length === 0 && appts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line bg-paper/60 p-12 text-center text-ink-soft">
+        <div className="card border-dashed bg-paper/60 p-12 text-center text-sm text-ink-soft">
           ยังไม่มีผู้ป่วย{isToday ? "วันนี้" : "ในวันที่เลือก"} —{" "}
           <Link href="/new-visit" className="font-medium text-teal-700 underline underline-offset-2">
             เปิด visit ใหม่
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
-          <table className="w-full text-[15px]">
+        <div className="card overflow-hidden">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-line bg-cream text-left text-sm text-ink-soft">
-                <th className="px-4 py-3 font-medium">เวลา</th>
-                <th className="px-4 py-3 font-medium">HN</th>
-                <th className="px-4 py-3 font-medium">ชื่อ-สกุล</th>
-                <th className="px-4 py-3 font-medium">อาการสำคัญ</th>
-                <th className="px-4 py-3 font-medium">สถานะ</th>
-                <th className="px-4 py-3 text-right font-medium">ยอดชำระ</th>
+              <tr>
+                <th className="w-16">เวลา</th>
+                <th className="w-20">HN</th>
+                <th>ชื่อ-สกุล</th>
+                <th>อาการสำคัญ</th>
+                <th className="w-28">สถานะ</th>
+                <th className="w-24 text-right">ยอดชำระ</th>
               </tr>
             </thead>
             <tbody>
               {rows.map(({ visit, patient, payment }) => (
-                <tr key={visit.id} className="border-b border-line/60 last:border-0 hover:bg-teal-50/60">
-                  <td className="px-4 py-3 tabular-nums text-ink-soft">{timeHM(visit.createdAt)}</td>
-                  <td className="px-4 py-3 font-medium tabular-nums">{patient.hn}</td>
-                  <td className="px-4 py-3">
+                <tr key={visit.id} className="hover:bg-teal-50/60">
+                  <td className="tabular-nums text-ink-soft">{timeHM(visit.createdAt)}</td>
+                  <td className="font-medium tabular-nums">{patient.hn}</td>
+                  <td>
                     <Link href={`/visits/${visit.id}`} className="font-medium text-teal-800 hover:underline">
                       {fullName(patient)}
                     </Link>
                     {patient.allergies && (
-                      <span className="ml-2 rounded bg-danger-soft px-1.5 py-0.5 text-xs font-medium text-danger">
-                        แพ้ยา
-                      </span>
+                      <span className="chip ml-2 bg-danger-soft text-danger">แพ้ยา</span>
                     )}
                   </td>
-                  <td className="max-w-50 truncate px-4 py-3 text-ink-soft">{visit.chiefComplaint ?? "-"}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_CHIP[visit.status]}`}>
+                  <td className="max-w-64 truncate text-ink-soft">{visit.chiefComplaint ?? "-"}</td>
+                  <td>
+                    <span className={`chip ${STATUS_CHIP[visit.status]}`}>
                       {VISIT_STATUS_LABEL[visit.status]}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                  <td className="text-right tabular-nums">
                     {payment ? `${baht(payment.total)} ฿` : "-"}
                   </td>
                 </tr>
               ))}
               {/* appointed patients not yet checked in — greyed out; clicking opens new-visit prefilled */}
               {appts.map(({ appt, patient }) => (
-                <tr key={`appt-${appt.id}`} className="border-b border-line/60 bg-cream/50 last:border-0 hover:bg-teal-50/60">
-                  <td className="px-4 py-3 text-ink-soft/60">นัด</td>
-                  <td className="px-4 py-3 font-medium tabular-nums text-ink-soft/60">{patient.hn}</td>
-                  <td className="px-4 py-3">
+                <tr key={`appt-${appt.id}`} className="bg-cream/50 hover:bg-teal-50/60">
+                  <td className="text-ink-soft/60">นัด</td>
+                  <td className="font-medium tabular-nums text-ink-soft/60">{patient.hn}</td>
+                  <td>
                     <Link
                       href={`/new-visit?appointmentId=${appt.id}`}
                       title="คลิกเพื่อเปิด visit"
@@ -141,18 +139,16 @@ export default async function ClinicPage({
                       {fullName(patient)}
                     </Link>
                     {patient.allergies && (
-                      <span className="ml-2 rounded bg-danger-soft px-1.5 py-0.5 text-xs font-medium text-danger opacity-70">
-                        แพ้ยา
-                      </span>
+                      <span className="chip ml-2 bg-danger-soft text-danger opacity-70">แพ้ยา</span>
                     )}
                   </td>
-                  <td className="max-w-50 truncate px-4 py-3 text-ink-soft/60">{appt.note ?? "-"}</td>
-                  <td className="px-4 py-3">
-                    <span className="rounded-full border border-dashed border-amber-strong/40 px-2.5 py-1 text-xs font-semibold text-amber-strong/80">
-                      นัดหมาย · ยังไม่มา
+                  <td className="max-w-64 truncate text-ink-soft/60">{appt.note ?? "-"}</td>
+                  <td>
+                    <span className="chip border border-dashed border-amber-strong/40 text-amber-strong/80">
+                      ยังไม่มา
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-ink-soft/60">-</td>
+                  <td className="text-right text-ink-soft/60">-</td>
                 </tr>
               ))}
             </tbody>
@@ -160,5 +156,13 @@ export default async function ClinicPage({
         </div>
       )}
     </div>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return (
+    <span className="text-ink-soft">
+      {label} <span className={`font-semibold tabular-nums ${tone}`}>{value}</span>
+    </span>
   );
 }

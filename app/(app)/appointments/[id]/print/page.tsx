@@ -66,11 +66,11 @@ export default async function AppointmentPrintPage({ params }: { params: Promise
         </div>
 
         <div className="border-2 border-teal-900 p-1">
-          <div className="border border-[#c8a24a] px-5 py-4 text-center">
-            <p className="text-[13px] tracking-wide text-ink-soft">แพทย์นัดตรวจครั้งถัดไป</p>
-            <p className="mt-1.5 text-xl font-bold text-teal-900">{thaiDateFull(appt.date)}</p>
+          <div className="border border-[#c8a24a] px-5 py-3.5 text-center">
+            <p className="text-[11px] tracking-wide text-ink-soft">แพทย์นัดตรวจครั้งถัดไป</p>
+            <p className="mt-1.5 text-lg font-bold text-teal-900">{thaiDateFull(appt.date)}</p>
             {appt.note && (
-              <p className="mt-1.5 text-[15px]">
+              <p className="mt-1.5 text-[12px]">
                 นัดมาเพื่อ: <span className="font-medium">{appt.note}</span>
               </p>
             )}

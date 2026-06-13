@@ -34,65 +34,58 @@ export default async function ReportsPage({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-teal-900">รายงานรายรับ</h1>
-          <p className="mt-1 text-sm text-ink-soft">
-            เดือนนี้ {monthVisits} visit · รวม{" "}
-            <span className="font-semibold text-ink">{baht(monthTotal)} บาท</span>
-          </p>
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-lg font-bold text-teal-900">รายงานรายรับ</h1>
+          <span className="text-sm text-ink-soft">
+            {monthVisits} visit · รวม{" "}
+            <span className="font-semibold text-teal-800 tabular-nums">{baht(monthTotal)}</span> บาท
+          </span>
         </div>
-        <form className="flex items-center gap-2">
-          <input
-            type="month"
-            name="month"
-            defaultValue={month}
-            className="rounded-lg border border-line bg-paper px-3 py-2 text-sm"
-          />
-          <button className="rounded-lg border border-line bg-paper px-3 py-2 text-sm font-medium hover:bg-cream">
-            ดู
-          </button>
+        <form className="flex items-center gap-1.5">
+          <input type="month" name="month" defaultValue={month} className="field w-auto" />
+          <button className="btn-ghost">ดู</button>
         </form>
       </header>
 
       {daily.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line bg-paper/60 p-10 text-center text-ink-soft">
+        <p className="card border-dashed bg-paper/60 p-10 text-center text-sm text-ink-soft">
           ไม่มีรายรับในเดือนที่เลือก
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-line bg-paper shadow-sm">
-          <table className="w-full text-[15px]">
+        <div className="card overflow-hidden">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-line bg-cream text-left text-sm text-ink-soft">
-                <th className="px-4 py-3 font-medium">วันที่</th>
-                <th className="px-4 py-3 text-right font-medium">จำนวน visit</th>
-                <th className="px-4 py-3 text-right font-medium">เงินสด</th>
-                <th className="px-4 py-3 text-right font-medium">เงินโอน</th>
-                <th className="px-4 py-3 text-right font-medium">รวม</th>
+              <tr>
+                <th>วันที่</th>
+                <th className="text-right">จำนวน visit</th>
+                <th className="text-right">เงินสด</th>
+                <th className="text-right">เงินโอน</th>
+                <th className="text-right">รวม</th>
               </tr>
             </thead>
             <tbody>
               {daily.map((d) => (
-                <tr key={d.date} className="border-b border-line/60 last:border-0">
-                  <td className="px-4 py-3">{thaiDate(d.date)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{d.visits}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{baht(d.cash)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{baht(d.transfer)}</td>
-                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{baht(d.total)}</td>
+                <tr key={d.date}>
+                  <td>{thaiDate(d.date)}</td>
+                  <td className="text-right tabular-nums">{d.visits}</td>
+                  <td className="text-right tabular-nums">{baht(d.cash)}</td>
+                  <td className="text-right tabular-nums">{baht(d.transfer)}</td>
+                  <td className="text-right font-semibold tabular-nums">{baht(d.total)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="border-t border-line bg-cream font-semibold">
-                <td className="px-4 py-3">รวมทั้งเดือน</td>
-                <td className="px-4 py-3 text-right tabular-nums">{monthVisits}</td>
-                <td className="px-4 py-3 text-right tabular-nums">
+                <td className="px-3 py-2">รวมทั้งเดือน</td>
+                <td className="px-3 py-2 text-right tabular-nums">{monthVisits}</td>
+                <td className="px-3 py-2 text-right tabular-nums">
                   {baht(daily.reduce((s, d) => s + d.cash, 0))}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums">
+                <td className="px-3 py-2 text-right tabular-nums">
                   {baht(daily.reduce((s, d) => s + d.transfer, 0))}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-teal-800">{baht(monthTotal)}</td>
+                <td className="px-3 py-2 text-right tabular-nums text-teal-800">{baht(monthTotal)}</td>
               </tr>
             </tfoot>
           </table>

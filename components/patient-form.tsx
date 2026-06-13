@@ -17,8 +17,7 @@ type PatientValues = {
   notes?: string | null;
 };
 
-const field =
-  "w-full rounded-lg border border-line bg-cream px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200";
+const field = "field";
 
 export function PatientForm({
   action,
@@ -154,15 +153,11 @@ export function PatientForm({
       </div>
 
       {state?.error && (
-        <p className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
+        <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
       )}
 
       <div className="flex items-center gap-4 pt-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-teal-700 px-5 py-2.5 font-semibold text-white transition hover:bg-teal-800 disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className="btn-primary px-5 py-2">
           {pending ? "กำลังบันทึก…" : submitLabel}
         </button>
         {openVisitOption && (

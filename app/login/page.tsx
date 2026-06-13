@@ -9,7 +9,7 @@ export default function LoginPage() {
     "Eye Clinic";
 
   return (
-    <main className="bg-grain flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <ClinicLogo size={84} className="mx-auto mb-4 drop-shadow-sm" />
