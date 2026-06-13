@@ -30,18 +30,8 @@ export function VisitRecordForm({ visit, readOnly }: { visit: Visit; readOnly: b
   }
 
   return (
-    <form action={onSubmit} className="card p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-wide text-ink-soft uppercase">บันทึกการตรวจ</h2>
-        {!readOnly && (
-          <div className="flex items-center gap-3">
-            {savedAt && <span className="text-xs text-ink-soft">บันทึกแล้ว {savedAt}</span>}
-            <button disabled={saving} className="btn-primary">
-              {saving ? "กำลังบันทึก…" : "บันทึก"}
-            </button>
-          </div>
-        )}
-      </div>
+    <form id="visit-record-form" action={onSubmit} className="card p-4">
+      <h2 className="mb-3 text-sm font-semibold tracking-wide text-ink-soft uppercase">บันทึกการตรวจ</h2>
 
       <fieldset disabled={readOnly} className="space-y-4">
         {/* vitals */}
@@ -84,6 +74,15 @@ export function VisitRecordForm({ visit, readOnly }: { visit: Visit; readOnly: b
           <input name="diagnosis" defaultValue={visit.diagnosis ?? ""} className={field} />
         </label>
       </fieldset>
+
+      {!readOnly && (
+        <div className="mt-4 flex items-center justify-end gap-3 border-t border-line pt-3">
+          {savedAt && <span className="text-xs text-ink-soft">บันทึกแล้ว {savedAt}</span>}
+          <button disabled={saving} className="btn-primary px-5 py-2">
+            {saving ? "กำลังบันทึก…" : "บันทึกการตรวจ"}
+          </button>
+        </div>
+      )}
     </form>
   );
 }

@@ -6,6 +6,7 @@ import {
   addMedicationItem,
   completeVisit,
   removeVisitItem,
+  saveVisitRecord,
 } from "../actions";
 import { baht } from "@/lib/format";
 
@@ -91,6 +92,25 @@ export function TreatmentSection({
         setCustomPrice("");
       }
       return res;
+    });
+  }
+
+  // Closing the visit also flushes the exam form so the user never loses
+  // unsaved vitals/notes by forgetting to press "บันทึกการตรวจ" first.
+  function closeVisit(method: "cash" | "transfer") {
+    setError(null);
+    startTransition(async () => {
+      const formEl = document.getElementById("visit-record-form");
+      if (formEl instanceof HTMLFormElement) {
+        try {
+          await saveVisitRecord(visitId, new FormData(formEl));
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "บันทึกข้อมูลการตรวจไม่สำเร็จ");
+          return;
+        }
+      }
+      const res = await completeVisit(visitId, method);
+      if (res && "error" in res && res.error) setError(res.error);
     });
   }
 
@@ -260,14 +280,14 @@ export function TreatmentSection({
               ปิด visit จะหักสต็อกยาและออกใบเสร็จ — แก้ไขไม่ได้หลังปิด
             </span>
             <button
-              onClick={() => run(() => completeVisit(visitId, "cash"))}
+              onClick={() => closeVisit("cash")}
               disabled={pending}
               className="btn-primary px-4 py-2"
             >
               ปิด visit · เงินสด {baht(total)} ฿
             </button>
             <button
-              onClick={() => run(() => completeVisit(visitId, "transfer"))}
+              onClick={() => closeVisit("transfer")}
               disabled={pending}
               className="btn px-4 py-2 border border-teal-700 text-teal-800 hover:bg-teal-50"
             >
