@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
 import { ageYears, fullName, thaiDate, VISIT_STATUS_LABEL } from "@/lib/format";
 import { openVisitAndGo } from "../actions";
+import { cancelAppointment } from "@/app/(app)/appointments/actions";
 
 const SEX_LABEL: Record<string, string> = { male: "ชาย", female: "หญิง", other: "อื่นๆ" };
 
@@ -22,8 +23,20 @@ export default async function PatientPage({ params }: { params: Promise<{ hn: st
     .orderBy(desc(tables.visits.visitDate), desc(tables.visits.id))
     .all();
 
+  const scheduledAppts = db
+    .select()
+    .from(tables.appointments)
+    .where(and(eq(tables.appointments.patientId, patient.id), eq(tables.appointments.status, "scheduled")))
+    .orderBy(asc(tables.appointments.date))
+    .all();
+
   const age = ageYears(patient.dob);
-  const openVisit = openVisitAndGo.bind(null, patient.id);
+  const openVisit = openVisitAndGo.bind(null, patient.id, undefined);
+
+  async function cancelAppt(appointmentId: number) {
+    "use server";
+    await cancelAppointment(appointmentId);
+  }
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -52,6 +65,35 @@ export default async function PatientPage({ params }: { params: Promise<{ hn: st
           </form>
         </div>
       </header>
+
+      {scheduledAppts.length > 0 && (
+        <div className="mb-5 rounded-xl border border-amber-strong/20 bg-amber-soft px-4 py-3">
+          <p className="mb-1 text-sm font-bold text-amber-strong">นัดหมายที่จะมาถึง</p>
+          <ul className="space-y-1.5">
+            {scheduledAppts.map((a) => (
+              <li key={a.id} className="flex flex-wrap items-center justify-between gap-2">
+                <p>
+                  📅 <span className="font-semibold">{thaiDate(a.date)}</span>
+                  {a.note && <span className="ml-2 text-ink-soft">· {a.note}</span>}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/appointments/${a.id}/print`}
+                    className="rounded-lg border border-line bg-paper px-3 py-1 text-sm font-medium hover:bg-cream"
+                  >
+                    🖨️ ใบนัด
+                  </Link>
+                  <form action={cancelAppt.bind(null, a.id)}>
+                    <button className="rounded-lg px-3 py-1 text-sm font-medium text-danger hover:bg-danger-soft">
+                      ยกเลิก
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {patient.allergies && (
         <div className="mb-5 flex items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3">

@@ -8,6 +8,13 @@
       "when": 1781194133951,
       "tag": "0000_secret_rocket_raccoon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1781237202393,
+      "tag": "0001_closed_rocket_racer",
+      "breakpoints": true
     }
   ]
 }

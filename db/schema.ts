@@ -61,6 +61,26 @@ export const visits = sqliteTable(
   (t) => [index("visits_date_idx").on(t.visitDate), index("visits_patient_idx").on(t.patientId)],
 );
 
+// ── Appointments (นัดหมาย) ───────────────────────────────────────────────────
+export const appointments = sqliteTable(
+  "appointments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    patientId: integer("patient_id").notNull().references(() => patients.id),
+    // visit during which the appointment was made (null if created elsewhere)
+    scheduledFromVisitId: integer("scheduled_from_visit_id").references(() => visits.id),
+    date: text("date").notNull(), // ISO date (YYYY-MM-DD)
+    note: text("note"), // เหตุผลที่นัด เช่น ฟังผลเลือด / ติดตามอาการ
+    status: text("status", { enum: ["scheduled", "arrived", "cancelled"] })
+      .notNull()
+      .default("scheduled"),
+    arrivedVisitId: integer("arrived_visit_id").references(() => visits.id),
+    createdBy: integer("created_by").notNull().references(() => users.id),
+    createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  },
+  (t) => [index("appointments_date_idx").on(t.date), index("appointments_patient_idx").on(t.patientId)],
+);
+
 // ── Medications (stock) ──────────────────────────────────────────────────────
 export const medications = sqliteTable("medications", {
   id: integer("id").primaryKey({ autoIncrement: true }),

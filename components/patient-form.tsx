@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { ageYears, isoToCE, parseDobParts, THAI_MONTHS_FULL } from "@/lib/format";
 
 type PatientValues = {
   prefix?: string | null;
@@ -35,6 +36,14 @@ export function PatientForm({
     null,
   );
 
+  // DOB is entered Thai-style (วัน / เดือน / ปี พ.ศ.) and stored as CE ISO.
+  const dobDefault = defaults?.dob ? isoToCE(defaults.dob).split("-") : null;
+  const [dobDay, setDobDay] = useState(dobDefault ? String(Number(dobDefault[2])) : "");
+  const [dobMonth, setDobMonth] = useState(dobDefault ? String(Number(dobDefault[1])) : "");
+  const [dobYearBE, setDobYearBE] = useState(dobDefault ? String(Number(dobDefault[0]) + 543) : "");
+  const dobParsed = parseDobParts(dobDay || null, dobMonth || null, dobYearBE || null);
+  const previewAge = "iso" in dobParsed && dobParsed.iso ? ageYears(dobParsed.iso) : null;
+
   return (
     <form action={formAction} className="space-y-4">
       <div className="grid grid-cols-12 gap-3">
@@ -58,15 +67,11 @@ export function PatientForm({
       </div>
 
       <div className="grid grid-cols-12 gap-3">
-        <label className="col-span-4">
+        <label className="col-span-5">
           <span className="mb-1 block text-sm font-medium">เลขบัตรประชาชน</span>
           <input name="nationalId" defaultValue={defaults?.nationalId ?? ""} className={field} />
         </label>
         <label className="col-span-3">
-          <span className="mb-1 block text-sm font-medium">วันเกิด</span>
-          <input type="date" name="dob" defaultValue={defaults?.dob ?? ""} className={field} />
-        </label>
-        <label className="col-span-2">
           <span className="mb-1 block text-sm font-medium">เพศ</span>
           <select name="sex" defaultValue={defaults?.sex ?? ""} className={field}>
             <option value="">-</option>
@@ -75,10 +80,51 @@ export function PatientForm({
             <option value="other">อื่นๆ</option>
           </select>
         </label>
-        <label className="col-span-3">
+        <label className="col-span-4">
           <span className="mb-1 block text-sm font-medium">เบอร์โทร</span>
           <input name="phone" defaultValue={defaults?.phone ?? ""} className={field} />
         </label>
+      </div>
+
+      <div className="grid grid-cols-12 items-end gap-3">
+        <label className="col-span-2">
+          <span className="mb-1 block text-sm font-medium">วันเกิด</span>
+          <input
+            name="dobDay"
+            inputMode="numeric"
+            placeholder="วันที่"
+            value={dobDay}
+            onChange={(e) => setDobDay(e.target.value)}
+            className={`${field} tabular-nums`}
+          />
+        </label>
+        <label className="col-span-4">
+          <span className="mb-1 block text-sm font-medium">เดือน</span>
+          <select name="dobMonth" value={dobMonth} onChange={(e) => setDobMonth(e.target.value)} className={field}>
+            <option value="">-</option>
+            {THAI_MONTHS_FULL.map((m, i) => (
+              <option key={m} value={i + 1}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="col-span-3">
+          <span className="mb-1 block text-sm font-medium">ปีเกิด (พ.ศ.)</span>
+          <input
+            name="dobYearBE"
+            inputMode="numeric"
+            placeholder="เช่น 2510"
+            value={dobYearBE}
+            onChange={(e) => setDobYearBE(e.target.value)}
+            className={`${field} tabular-nums`}
+          />
+        </label>
+        <p className="col-span-3 pb-2 text-sm text-ink-soft">
+          {"error" in dobParsed
+            ? <span className="text-danger">{dobParsed.error}</span>
+            : previewAge !== null && <>อายุ <span className="font-semibold text-ink">{previewAge}</span> ปี</>}
+        </p>
       </div>
 
       <label className="block">

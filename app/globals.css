@@ -40,6 +40,12 @@ body {
   background: var(--color-teal-200);
 }
 
+/* keep letterhead colors (gold rules, cream total band) on paper */
+.print-doc {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 @media print {
   body {
     background: white;

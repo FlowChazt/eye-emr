@@ -4,7 +4,9 @@ import { asc, eq } from "drizzle-orm";
 import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
 import { baht, fullName, thaiDate } from "@/lib/format";
-import { PrintButton } from "./print-button";
+import { bahtText } from "@/lib/baht-text";
+import { PrintButton } from "@/components/print-button";
+import { DocField, PrintDoc } from "@/components/print-doc";
 
 async function getSetting(key: string): Promise<string> {
   const row = db.select().from(tables.settings).where(eq(tables.settings.key, key)).get();
@@ -43,62 +45,61 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         <PrintButton />
       </div>
 
-      {/* A5-proportioned receipt */}
-      <div className="receipt rounded-xl border border-line bg-white p-8 font-print shadow-sm print:rounded-none print:border-0 print:p-0 print:shadow-none">
-        <header className="mb-6 text-center">
-          <h1 className="text-xl font-bold">{clinicName || "Eye Clinic"}</h1>
-          {clinicAddress && <p className="text-sm">{clinicAddress}</p>}
-          {clinicPhone && <p className="text-sm">โทร. {clinicPhone}</p>}
-          <p className="mt-3 text-lg font-bold">ใบเสร็จรับเงิน</p>
-        </header>
-
-        <div className="mb-4 flex justify-between text-sm">
-          <div>
-            <p>
-              ผู้ป่วย: <span className="font-medium">{fullName(patient)}</span>
-            </p>
-            <p>HN: {patient.hn}</p>
-          </div>
-          <div className="text-right">
-            <p>เลขที่: {payment.receiptNo}</p>
-            <p>วันที่: {thaiDate(visit.visitDate)}</p>
-          </div>
+      <PrintDoc
+        clinicName={clinicName || "Eye Clinic"}
+        clinicAddress={clinicAddress}
+        clinicPhone={clinicPhone}
+        title="ใบเสร็จรับเงิน"
+        titleEn="Receipt"
+        meta={[
+          { label: "เลขที่", value: payment.receiptNo },
+          { label: "วันที่", value: thaiDate(visit.visitDate) },
+        ]}
+        signature={{ role: "ผู้รับเงิน", name: receiver?.displayName }}
+      >
+        <div className="mb-4 grid grid-cols-[1fr_auto] gap-x-6 gap-y-1.5">
+          <DocField label="ได้รับเงินจาก" value={fullName(patient)} />
+          <DocField label="HN" value={patient.hn} className="w-36" />
         </div>
 
-        <table className="mb-4 w-full text-sm">
+        <table className="w-full border-collapse text-[14px]">
           <thead>
-            <tr className="border-y border-black/60">
-              <th className="py-1.5 text-left font-semibold">รายการ</th>
-              <th className="py-1.5 text-right font-semibold">จำนวน</th>
-              <th className="py-1.5 text-right font-semibold">ราคา/หน่วย</th>
-              <th className="py-1.5 text-right font-semibold">จำนวนเงิน</th>
+            <tr className="border-y-2 border-teal-900 text-teal-900">
+              <th className="py-1.5 pr-2 text-left font-bold">รายการ</th>
+              <th className="w-16 py-1.5 text-right font-bold">จำนวน</th>
+              <th className="w-24 py-1.5 text-right font-bold">ราคา/หน่วย</th>
+              <th className="w-24 py-1.5 text-right font-bold">จำนวนเงิน</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((it) => (
-              <tr key={it.id} className="border-b border-dotted border-black/20">
-                <td className="py-1.5">{it.description}</td>
+            {items.map((it, i) => (
+              <tr key={it.id} className="border-b border-dotted border-ink/25">
+                <td className="py-1.5 pr-2">
+                  <span className="mr-2 inline-block w-5 text-right tabular-nums text-ink-soft">{i + 1}.</span>
+                  {it.description}
+                </td>
                 <td className="py-1.5 text-right tabular-nums">{it.qty}</td>
                 <td className="py-1.5 text-right tabular-nums">{baht(it.unitPrice)}</td>
                 <td className="py-1.5 text-right tabular-nums">{baht(it.lineTotal)}</td>
               </tr>
             ))}
           </tbody>
-          <tfoot>
-            <tr className="border-t border-black/60">
-              <td colSpan={3} className="py-2 text-right font-bold">
-                รวมทั้งสิ้น
-              </td>
-              <td className="py-2 text-right text-base font-bold tabular-nums">{baht(payment.total)} บาท</td>
-            </tr>
-          </tfoot>
         </table>
 
-        <div className="flex justify-between text-sm">
-          <p>ชำระโดย: {payment.method === "cash" ? "เงินสด" : "เงินโอน"}</p>
-          <p>ผู้รับเงิน: {receiver?.displayName ?? "-"}</p>
+        <div className="mt-3 flex items-stretch border-2 border-teal-900">
+          <p className="flex-1 px-3 py-2 text-center text-[14px]">
+            ({bahtText(payment.total)})
+          </p>
+          <p className="flex items-center gap-3 border-l-2 border-teal-900 bg-cream px-4 py-2 font-bold">
+            รวมทั้งสิ้น <span className="text-base tabular-nums">{baht(payment.total)} บาท</span>
+          </p>
         </div>
-      </div>
+
+        <p className="mt-3 text-[14px]">
+          ชำระโดย:{" "}
+          <span className="font-medium">{payment.method === "cash" ? "เงินสด" : "เงินโอน"}</span>
+        </p>
+      </PrintDoc>
     </div>
   );
 }

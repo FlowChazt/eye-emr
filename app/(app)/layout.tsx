@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { eq } from "drizzle-orm";
+import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
 import { logout } from "@/app/login/actions";
 import { NavLink } from "@/components/nav-link";
+import { ClinicLogo } from "@/components/clinic-logo";
 
 const NAV = [
   { href: "/", label: "คลินิก", icon: "🏥" },
@@ -13,15 +16,16 @@ const NAV = [
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const clinicName =
+    db.select().from(tables.settings).where(eq(tables.settings.key, "clinic_name")).get()?.value ||
+    "Eye Clinic";
 
   return (
     <div className="flex min-h-screen">
       <aside className="no-print sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-teal-800 bg-teal-900 text-teal-100">
         <Link href="/" className="flex items-center gap-3 px-5 py-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-lg font-bold text-white">
-            E
-          </span>
-          <span className="text-lg font-bold text-white">Eye Clinic</span>
+          <ClinicLogo size={40} variant="dark" className="shrink-0" />
+          <span className="text-base leading-tight font-bold text-white">{clinicName}</span>
         </Link>
 
         <nav className="flex-1 space-y-1 px-3">

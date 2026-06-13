@@ -1,10 +1,11 @@
 "use server";
 
-import { eq, like, or, sql } from "drizzle-orm";
+import { and, eq, like, lte, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db, tables } from "@/db";
 import { nextHN } from "@/lib/counters";
+import { parseDobParts, todayISO } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 
 function patientFromForm(formData: FormData) {
@@ -15,13 +16,16 @@ function patientFromForm(formData: FormData) {
   const firstName = get("firstName");
   const lastName = get("lastName");
   if (!firstName || !lastName) return { error: "กรุณากรอกชื่อและนามสกุล" } as const;
+  // DOB arrives Thai-style (วัน/เดือน/ปี พ.ศ.) and is stored as CE ISO
+  const dob = parseDobParts(get("dobDay"), get("dobMonth"), get("dobYearBE"));
+  if ("error" in dob) return { error: dob.error } as const;
   return {
     data: {
       prefix: get("prefix"),
       firstName,
       lastName,
       nationalId: get("nationalId"),
-      dob: get("dob"),
+      dob: dob.iso,
       sex: (get("sex") as "male" | "female" | "other" | null) ?? null,
       phone: get("phone"),
       address: get("address"),
@@ -91,21 +95,36 @@ export async function searchPatients(query: string) {
     .all();
 }
 
-/** Open a new visit for an existing patient (today, status waiting). */
-export async function openVisitForPatient(patientId: number): Promise<number> {
+/**
+ * Open a new visit for an existing patient (today, status waiting).
+ * Any scheduled appointment due today or earlier is marked arrived; pass
+ * `fromAppointmentId` to also consume a specific (e.g. future-dated) one.
+ */
+export async function openVisitForPatient(patientId: number, fromAppointmentId?: number): Promise<number> {
   const user = await requireUser();
-  const today = new Date();
-  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const visit = db
-    .insert(tables.visits)
-    .values({ patientId, visitDate: iso, createdBy: user.userId })
-    .returning()
-    .get();
+  const iso = todayISO();
+  const visit = db.transaction((tx) => {
+    const v = tx
+      .insert(tables.visits)
+      .values({ patientId, visitDate: iso, createdBy: user.userId })
+      .returning()
+      .get();
+    const due = fromAppointmentId
+      ? or(eq(tables.appointments.id, fromAppointmentId), lte(tables.appointments.date, iso))
+      : lte(tables.appointments.date, iso);
+    tx.update(tables.appointments)
+      .set({ status: "arrived", arrivedVisitId: v.id })
+      .where(and(eq(tables.appointments.patientId, patientId), eq(tables.appointments.status, "scheduled"), due))
+      .run();
+    return v;
+  });
   revalidatePath("/");
   return visit.id;
 }
 
-export async function openVisitAndGo(patientId: number) {
-  const visitId = await openVisitForPatient(patientId);
+export async function openVisitAndGo(patientId: number, fromAppointmentId?: number) {
+  // guard: when bound as a <form action>, FormData arrives as the 2nd argument
+  const apptId = typeof fromAppointmentId === "number" ? fromAppointmentId : undefined;
+  const visitId = await openVisitForPatient(patientId, apptId);
   redirect(`/visits/${visitId}`);
 }
