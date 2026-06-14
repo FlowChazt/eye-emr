@@ -44,3 +44,6 @@ next-env.d.ts
 data/
 *.png
 .playwright-mcp/
+
+# Windows deploy: machine-generated secret/config, never commit
+deploy/windows/config.bat
