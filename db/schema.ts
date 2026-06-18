@@ -8,6 +8,8 @@ export const users = sqliteTable("users", {
   displayName: text("display_name").notNull(),
   passwordHash: text("password_hash").notNull(),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
+  // when set, closing a visit auto-prints all of its documents
+  autoPrintOnClose: integer("auto_print_on_close", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
 });
 
@@ -85,10 +87,21 @@ export const appointments = sqliteTable(
 export const medications = sqliteTable("medications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
+  // "drug" = stocked medication (default); "procedure" = หัตถการ/อุปกรณ์ —
+  // a billable service/item with no stock, สรรพคุณ, วิธีใช้ or drug label.
+  kind: text("kind", { enum: ["drug", "procedure"] }).notNull().default("drug"),
+  // procedures only: auto-added to every new visit (shared clinic-wide setting)
+  autoAddOnVisit: integer("auto_add_on_visit", { mode: "boolean" }).notNull().default(false),
   unit: text("unit").notNull().default("เม็ด"), // เม็ด/แคปซูล/ขวด/ซอง/หลอด...
   price: real("price").notNull().default(0), // selling price per unit (THB)
   stockQty: integer("stock_qty").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(10),
+  // one portion = default qty dispensed AND how much fits in one drug packet;
+  // drives autofill qty and the number of labels printed (ceil(qty / portion)).
+  portionAmount: real("portion_amount"),
+  // lay description of what the drug is for, printed on the label (สรรพคุณ),
+  // e.g. "ยาลดกรดในกระเพาะ แก้ปวดท้องกระเพาะ"
+  indication: text("indication"),
   defaultInstructions: text("default_instructions"), // e.g. "1x3 หลังอาหาร"
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
@@ -102,9 +115,10 @@ export const visitItems = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     visitId: integer("visit_id").notNull().references(() => visits.id),
-    type: text("type", { enum: ["medication", "custom"] }).notNull(),
+    type: text("type", { enum: ["medication", "custom", "procedure"] }).notNull(),
     medicationId: integer("medication_id").references(() => medications.id),
     description: text("description").notNull(), // snapshot of med name, or custom text
+    instructions: text("instructions"), // วิธีใช้ for the drug label (meds only)
     qty: real("qty").notNull().default(1),
     unitPrice: real("unit_price").notNull(), // snapshot (THB)
     lineTotal: real("line_total").notNull(),

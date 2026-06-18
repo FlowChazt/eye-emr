@@ -1,0 +1,1 @@
+ALTER TABLE `visit_items` ADD `instructions` text;

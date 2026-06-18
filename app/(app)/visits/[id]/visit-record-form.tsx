@@ -29,8 +29,26 @@ export function VisitRecordForm({ visit, readOnly }: { visit: Visit; readOnly: b
     });
   }
 
+  // Enter in a single-line input jumps to the next field instead of submitting.
+  // The multi-line note <textarea> is left alone so Enter still inserts a newline.
+  function onKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+    if (e.key !== "Enter") return;
+    const el = e.target;
+    if (!(el instanceof HTMLInputElement)) return;
+    e.preventDefault();
+    const controls = Array.from(el.form?.elements ?? []).filter(
+      (n): n is HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement =>
+        (n instanceof HTMLInputElement || n instanceof HTMLTextAreaElement || n instanceof HTMLButtonElement) &&
+        !n.disabled,
+    );
+    const next = controls[controls.indexOf(el) + 1];
+    if (!next) return;
+    next.focus();
+    if (next instanceof HTMLInputElement) next.select();
+  }
+
   return (
-    <form id="visit-record-form" action={onSubmit} className="card p-4">
+    <form id="visit-record-form" action={onSubmit} onKeyDown={onKeyDown} className="card p-4">
       <h2 className="mb-3 text-sm font-semibold tracking-wide text-ink-soft uppercase">บันทึกการตรวจ</h2>
 
       <fieldset disabled={readOnly} className="space-y-4">

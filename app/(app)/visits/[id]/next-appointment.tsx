@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { cancelAppointment, createAppointment } from "@/app/(app)/appointments/actions";
 import { thaiDate, todayISO } from "@/lib/format";
-import { PrintIcon } from "@/components/icons";
 
 type Appointment = {
   id: number;
@@ -77,19 +75,14 @@ export function NextAppointment({
                 <span className="font-semibold">{thaiDate(a.date)}</span>
                 {a.note && <span className="ml-2 text-ink-soft">· {a.note}</span>}
               </p>
-              <div className="flex items-center gap-2">
-                <Link href={`/appointments/${a.id}/print`} className="btn-ghost">
-                  <PrintIcon size={15} /> พิมพ์ใบนัด
-                </Link>
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => cancel(a.id)}
-                  className="btn-danger"
-                >
-                  ยกเลิกนัด
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => cancel(a.id)}
+                className="btn-danger"
+              >
+                ยกเลิกนัด
+              </button>
             </li>
           ))}
         </ul>

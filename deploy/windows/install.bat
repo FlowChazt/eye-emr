@@ -73,8 +73,8 @@ echo.
 echo Copying static assets into the standalone bundle...
 xcopy /E /I /Y "%ROOT%\.next\static" "%ROOT%\.next\standalone\.next\static" >nul || goto :fail
 if exist "%ROOT%\public" xcopy /E /I /Y "%ROOT%\public" "%ROOT%\.next\standalone\public" >nul
-REM safety net in case file-tracing missed them:
-if not exist "%ROOT%\.next\standalone\drizzle" xcopy /E /I /Y "%ROOT%\drizzle" "%ROOT%\.next\standalone\drizzle" >nul
+REM always refresh migrations so schema changes ship (and overwrite stale ones)
+xcopy /E /I /Y "%ROOT%\drizzle" "%ROOT%\.next\standalone\drizzle" >nul
 if not exist "%ROOT%\.next\standalone\node_modules\better-sqlite3\build" xcopy /E /I /Y "%ROOT%\node_modules\better-sqlite3" "%ROOT%\.next\standalone\node_modules\better-sqlite3" >nul
 
 REM --- 4. seed the production DB ONCE (never clobber existing data) ---

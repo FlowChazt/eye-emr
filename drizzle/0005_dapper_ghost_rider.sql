@@ -1,0 +1,1 @@
+ALTER TABLE `medications` ADD `indication` text;

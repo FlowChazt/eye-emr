@@ -8,7 +8,7 @@ export default async function StockPage() {
   await requireUser();
   const meds = db.select().from(tables.medications).orderBy(asc(tables.medications.name)).all();
 
-  const low = meds.filter((m) => m.active && m.stockQty <= m.lowStockThreshold);
+  const low = meds.filter((m) => m.active && m.kind === "drug" && m.stockQty <= m.lowStockThreshold);
 
   return (
     <div className="mx-auto max-w-5xl">

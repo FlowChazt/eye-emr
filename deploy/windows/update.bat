@@ -28,7 +28,8 @@ call npm run build --prefix "%ROOT%" || goto :fail
 echo Copying static assets...
 xcopy /E /I /Y "%ROOT%\.next\static" "%ROOT%\.next\standalone\.next\static" >nul || goto :fail
 if exist "%ROOT%\public" xcopy /E /I /Y "%ROOT%\public" "%ROOT%\.next\standalone\public" >nul
-if not exist "%ROOT%\.next\standalone\drizzle" xcopy /E /I /Y "%ROOT%\drizzle" "%ROOT%\.next\standalone\drizzle" >nul
+REM always refresh migrations so new schema changes ship with the update
+xcopy /E /I /Y "%ROOT%\drizzle" "%ROOT%\.next\standalone\drizzle" >nul
 if not exist "%ROOT%\.next\standalone\node_modules\better-sqlite3\build" xcopy /E /I /Y "%ROOT%\node_modules\better-sqlite3" "%ROOT%\.next\standalone\node_modules\better-sqlite3" >nul
 
 echo.

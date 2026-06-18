@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `auto_print_on_close` integer DEFAULT false NOT NULL;

@@ -109,6 +109,34 @@ export async function openVisitForPatient(patientId: number, fromAppointmentId?:
       .values({ patientId, visitDate: iso, createdBy: user.userId })
       .returning()
       .get();
+
+    // auto-add หัตถการ flagged for every visit (e.g. ค่าตรวจ). Only happens at
+    // visit creation — reopening a visit never re-runs this.
+    const autoProcs = tx
+      .select()
+      .from(tables.medications)
+      .where(
+        and(
+          eq(tables.medications.kind, "procedure"),
+          eq(tables.medications.autoAddOnVisit, true),
+          eq(tables.medications.active, true),
+        ),
+      )
+      .all();
+    for (const p of autoProcs) {
+      tx.insert(tables.visitItems)
+        .values({
+          visitId: v.id,
+          type: "procedure",
+          medicationId: p.id,
+          description: p.name,
+          qty: 1,
+          unitPrice: p.price,
+          lineTotal: p.price,
+        })
+        .run();
+    }
+
     const due = fromAppointmentId
       ? or(eq(tables.appointments.id, fromAppointmentId), lte(tables.appointments.date, iso))
       : lte(tables.appointments.date, iso);

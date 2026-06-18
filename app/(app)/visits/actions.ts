@@ -1,10 +1,11 @@
 "use server";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db, tables } from "@/db";
 import { nextReceiptNo } from "@/lib/counters";
+import { todayISO } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 
 function numOrNull(v: FormDataEntryValue | null): number | null {
@@ -55,19 +56,44 @@ export async function addMedicationItem(visitId: number, medicationId: number, q
   if (!visit || visit.status === "completed") return { error: "visit นี้ปิดแล้ว" };
 
   const med = db.select().from(tables.medications).where(eq(tables.medications.id, medicationId)).get();
-  if (!med) return { error: "ไม่พบยานี้" };
-  if (med.stockQty < qty) return { error: `สต็อกไม่พอ (เหลือ ${med.stockQty} ${med.unit})` };
+  if (!med) return { error: "ไม่พบรายการนี้" };
+  const isProcedure = med.kind === "procedure";
+  if (!isProcedure && med.stockQty < qty) return { error: `สต็อกไม่พอ (เหลือ ${med.stockQty} ${med.unit})` };
 
   db.insert(tables.visitItems)
     .values({
       visitId,
-      type: "medication",
+      type: isProcedure ? "procedure" : "medication",
       medicationId,
       description: med.name,
+      instructions: isProcedure ? null : (med.defaultInstructions ?? null),
       qty,
       unitPrice: med.price,
       lineTotal: Math.round(med.price * qty * 100) / 100,
     })
+    .run();
+
+  revalidatePath(`/visits/${visitId}`);
+  return { ok: true };
+}
+
+/** Per-user preference: auto-print all documents when a visit is closed. */
+export async function setAutoPrintOnClose(value: boolean) {
+  const user = await requireUser();
+  db.update(tables.users).set({ autoPrintOnClose: value }).where(eq(tables.users.id, user.userId)).run();
+  return { ok: true };
+}
+
+/** Set the วิธีใช้ (label instructions) for a medication line item. */
+export async function setItemInstructions(visitId: number, itemId: number, instructions: string) {
+  await requireUser();
+  const visit = db.select().from(tables.visits).where(eq(tables.visits.id, visitId)).get();
+  if (!visit || visit.status === "completed") return { error: "visit นี้ปิดแล้ว" };
+
+  const text = instructions.trim();
+  db.update(tables.visitItems)
+    .set({ instructions: text === "" ? null : text })
+    .where(eq(tables.visitItems.id, itemId))
     .run();
 
   revalidatePath(`/visits/${visitId}`);
@@ -157,5 +183,56 @@ export async function completeVisit(visitId: number, method: "cash" | "transfer"
   revalidatePath(`/visits/${visitId}`);
   revalidatePath("/");
   revalidatePath("/stock");
-  redirect(`/visits/${visitId}/receipt`);
+
+  const u = db.select().from(tables.users).where(eq(tables.users.id, user.userId)).get();
+  redirect(`/visits/${visitId}${u?.autoPrintOnClose ? "?printAll=1" : ""}`);
+}
+
+/**
+ * Reopen a closed visit — only allowed on the same clinic day it was created.
+ * Reverses the checkout: restores dispensed stock, voids the payment/receipt,
+ * and flips the visit back to in_progress so it can be edited again. Re-closing
+ * issues a fresh receipt number (the voided one is simply skipped).
+ */
+export async function reopenVisit(visitId: number) {
+  await requireUser();
+
+  try {
+    db.transaction((tx) => {
+      const visit = tx.select().from(tables.visits).where(eq(tables.visits.id, visitId)).get();
+      if (!visit) throw new Error("ไม่พบ visit นี้");
+      if (visit.status !== "completed") throw new Error("visit นี้ยังไม่ได้ปิด");
+      if (visit.visitDate !== todayISO()) throw new Error("เปิด visit ซ้ำได้เฉพาะวันนี้เท่านั้น");
+
+      // restore stock from this visit's dispense movements, then remove them
+      const movements = tx
+        .select()
+        .from(tables.stockMovements)
+        .where(and(eq(tables.stockMovements.visitId, visitId), eq(tables.stockMovements.reason, "dispense")))
+        .all();
+      for (const mv of movements) {
+        tx.update(tables.medications)
+          .set({ stockQty: sql`${tables.medications.stockQty} - ${mv.change}` })
+          .where(eq(tables.medications.id, mv.medicationId))
+          .run();
+      }
+      tx.delete(tables.stockMovements)
+        .where(and(eq(tables.stockMovements.visitId, visitId), eq(tables.stockMovements.reason, "dispense")))
+        .run();
+
+      // void the receipt and unlock the visit
+      tx.delete(tables.payments).where(eq(tables.payments.visitId, visitId)).run();
+      tx.update(tables.visits)
+        .set({ status: "in_progress", completedAt: null })
+        .where(eq(tables.visits.id, visitId))
+        .run();
+    });
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "เกิดข้อผิดพลาด" };
+  }
+
+  revalidatePath(`/visits/${visitId}`);
+  revalidatePath("/");
+  revalidatePath("/stock");
+  return { ok: true };
 }

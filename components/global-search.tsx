@@ -18,12 +18,14 @@ export function GlobalSearch() {
   const boxRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Patient[] | null>(null);
+  const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
   const [, startSearch] = useTransition();
 
   function run(q: string) {
     setQuery(q);
     setOpen(true);
+    setActive(0);
     if (q.trim().length < 2) {
       setResults(null);
       return;
@@ -57,8 +59,22 @@ export function GlobalSearch() {
         onChange={(e) => run(e.target.value)}
         onFocus={() => results && setOpen(true)}
         onKeyDown={(e) => {
-          if (e.key === "Escape") setOpen(false);
-          if (e.key === "Enter" && results && results.length > 0) go(results[0].hn);
+          if (e.key === "Escape") {
+            setOpen(false);
+            return;
+          }
+          const list = results?.slice(0, 8) ?? [];
+          if (list.length === 0) return;
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActive((i) => Math.min(i + 1, list.length - 1));
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActive((i) => Math.max(i - 1, 0));
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            go(list[Math.min(active, list.length - 1)].hn);
+          }
         }}
         placeholder="ค้นหาผู้ป่วย…"
         className="w-full rounded-md border border-line bg-cream py-1.5 pr-3 pl-8 text-sm outline-none focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-100"
@@ -70,13 +86,14 @@ export function GlobalSearch() {
             <p className="px-3 py-2.5 text-sm text-ink-soft">ไม่พบผู้ป่วย</p>
           ) : (
             <ul className="max-h-80 overflow-auto">
-              {results.slice(0, 8).map((p) => {
+              {results.slice(0, 8).map((p, i) => {
                 const age = ageYears(p.dob);
                 return (
                   <li key={p.id}>
                     <button
                       onClick={() => go(p.hn)}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-teal-50"
+                      onMouseEnter={() => setActive(i)}
+                      className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-teal-50 ${i === active ? "bg-teal-50" : ""}`}
                     >
                       <span className="font-semibold tabular-nums text-teal-700">{p.hn}</span>
                       <span className="font-medium">{fullName(p)}</span>

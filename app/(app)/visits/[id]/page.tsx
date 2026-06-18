@@ -1,20 +1,29 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
 import { db, tables } from "@/db";
 import { requireUser } from "@/lib/session";
-import { baht, thaiDate, VISIT_STATUS_LABEL } from "@/lib/format";
+import { baht, thaiDate, todayISO, VISIT_STATUS_LABEL } from "@/lib/format";
 import { PatientBanner } from "@/components/patient-banner";
-import { PrintIcon } from "@/components/icons";
 import { VisitRecordForm } from "./visit-record-form";
 import { TreatmentSection } from "./treatment-section";
 import { VisitTabs } from "./visit-tabs";
 import { HistoryPanel } from "./history-panel";
 import { NextAppointment } from "./next-appointment";
+import { ReopenButton } from "./reopen-button";
+import { PrintBar } from "./print-bar";
 
-export default async function VisitPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireUser();
+type DocKind = "receipt" | "appointment" | "labels";
+
+export default async function VisitPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ printAll?: string }>;
+}) {
+  const me = await requireUser();
   const { id } = await params;
+  const { printAll } = await searchParams;
   const visitId = Number(id);
   if (!Number.isInteger(visitId)) notFound();
 
@@ -67,6 +76,18 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
     .all();
 
   const readOnly = visit.status === "completed";
+  const canReopen = visit.status === "completed" && visit.visitDate === todayISO();
+
+  // which documents can be printed for this visit (appointment = any upcoming
+  // appointment shown in the "นัดครั้งถัดไป" card)
+  const availableDocs: DocKind[] = [
+    payment ? ("receipt" as const) : null,
+    scheduledAppts.length > 0 ? ("appointment" as const) : null,
+    items.some((it) => it.type === "medication") ? ("labels" as const) : null,
+  ].filter((d): d is DocKind => d !== null);
+
+  const meRow = db.select().from(tables.users).where(eq(tables.users.id, me.userId)).get();
+  const autoPrintOnClose = !!meRow?.autoPrintOnClose;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -78,13 +99,6 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
             Visit · {thaiDate(visit.visitDate)} ·{" "}
             <span className="font-medium">{VISIT_STATUS_LABEL[visit.status]}</span>
           </>
-        }
-        actions={
-          readOnly && payment ? (
-            <Link href={`/visits/${visit.id}/receipt`} className="btn-ghost">
-              <PrintIcon size={16} /> พิมพ์ใบเสร็จ ({payment.receiptNo})
-            </Link>
-          ) : null
         }
       />
 
@@ -106,11 +120,22 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
             <TreatmentSection visitId={visit.id} items={items} medications={meds} readOnly={readOnly} />
 
             {readOnly && payment && (
-              <div className="card border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
-                ชำระแล้ว <span className="font-semibold tabular-nums">{baht(payment.total)}</span> บาท ({payment.method === "cash" ? "เงินสด" : "โอน"}) · ใบเสร็จ{" "}
-                {payment.receiptNo}
+              <div className="card flex items-center justify-between gap-3 border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900">
+                <span>
+                  ชำระแล้ว <span className="font-semibold tabular-nums">{baht(payment.total)}</span> บาท ({payment.method === "cash" ? "เงินสด" : "โอน"}) · ใบเสร็จ{" "}
+                  {payment.receiptNo}
+                </span>
+                {canReopen && <ReopenButton visitId={visit.id} />}
               </div>
             )}
+
+            {/* all printing lives at the bottom */}
+            <PrintBar
+              visitId={visit.id}
+              available={availableDocs}
+              autoPrintOnClose={autoPrintOnClose}
+              printAllOnMount={printAll === "1"}
+            />
           </>
         }
         history={<HistoryPanel patientHn={patient.hn} visits={prevVisits} itemsByVisit={itemsByVisit} />}

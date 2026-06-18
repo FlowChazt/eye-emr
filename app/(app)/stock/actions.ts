@@ -7,19 +7,50 @@ import { requireUser } from "@/lib/session";
 
 function medFromForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) return { error: "กรุณากรอกชื่อยา" } as const;
+  if (!name) return { error: "กรุณากรอกชื่อ" } as const;
   const price = Number(formData.get("price") ?? 0);
-  const lowStockThreshold = Number(formData.get("lowStockThreshold") ?? 10);
   if (!Number.isFinite(price) || price < 0) return { error: "ราคาไม่ถูกต้อง" } as const;
+
+  // หัตถการ/อุปกรณ์: billable, but no stock / portion / สรรพคุณ / วิธีใช้ / label
+  if (String(formData.get("kind") ?? "") === "procedure") {
+    return {
+      data: {
+        name,
+        kind: "procedure" as const,
+        autoAddOnVisit: formData.get("autoAddOnVisit") != null,
+        unit: "ครั้ง",
+        price,
+        lowStockThreshold: 0,
+        portionAmount: null,
+        indication: null,
+        defaultInstructions: null,
+      },
+    } as const;
+  }
+
+  const lowStockThreshold = Number(formData.get("lowStockThreshold") ?? 10);
+  const portion = Number(formData.get("portionAmount") ?? "");
   return {
     data: {
       name,
+      kind: "drug" as const,
+      autoAddOnVisit: false,
       unit: String(formData.get("unit") ?? "เม็ด").trim() || "เม็ด",
       price,
       lowStockThreshold: Number.isFinite(lowStockThreshold) ? Math.max(0, lowStockThreshold) : 10,
+      portionAmount: Number.isFinite(portion) && portion > 0 ? portion : null,
+      indication: String(formData.get("indication") ?? "").trim() || null,
       defaultInstructions: String(formData.get("defaultInstructions") ?? "").trim() || null,
     },
   } as const;
+}
+
+/** Toggle whether a หัตถการ is auto-added to every new visit (clinic-wide). */
+export async function setAutoAddOnVisit(medicationId: number, value: boolean) {
+  await requireUser();
+  db.update(tables.medications).set({ autoAddOnVisit: value }).where(eq(tables.medications.id, medicationId)).run();
+  revalidatePath("/stock");
+  return { ok: true };
 }
 
 export async function createMedication(_prev: unknown, formData: FormData) {

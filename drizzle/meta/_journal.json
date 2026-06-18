@@ -15,6 +15,41 @@
       "when": 1781237202393,
       "tag": "0001_closed_rocket_racer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781782647031,
+      "tag": "0002_quick_stick",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1781784067956,
+      "tag": "0003_amusing_typhoid_mary",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1781784858020,
+      "tag": "0004_yielding_cyclops",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1781785012714,
+      "tag": "0005_dapper_ghost_rider",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1781786133359,
+      "tag": "0006_unusual_reavers",
+      "breakpoints": true
     }
   ]
 }
