@@ -76,3 +76,11 @@ context. Most recent first.
   standalone build. `install.bat` / `update.bat` now **always** re-copy `drizzle/`
   into `.next/standalone` (previously guarded by `if not exist`, which could ship
   stale migrations on an update).
+- **Migrations never run during `next build`.** `db/index.ts` migrates at
+  import time; `next build` collects page data with ~15 worker processes that
+  each import it, so concurrent migrations raced on the one SQLite file and
+  crashed an *update* (pending migrations) with `duplicate column name`. Fix:
+  a `NEXT_PHASE === "phase-production-build"` guard skips migration during build,
+  and a custom **idempotent** runner (replacing drizzle's `migrate()`) tolerates
+  DDL a prior interrupted run half-applied — so a half-migrated DB self-heals on
+  next launch. `scripts/check-migrate.ts` reproduces + verifies this.
