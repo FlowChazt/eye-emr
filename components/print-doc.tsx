@@ -27,8 +27,8 @@ export function PrintDoc({
   footnote?: ReactNode;
 }) {
   return (
-    <div className="print-doc relative overflow-hidden border-2 border-teal-900 bg-white p-1 font-print text-[12px] leading-relaxed text-ink shadow-sm print:shadow-none">
-      <div className="relative flex min-h-[150mm] flex-col border border-teal-900/60 px-6 py-5">
+    <div className="print-doc relative flex aspect-[148/210] w-full flex-col overflow-hidden border-2 border-teal-900 bg-white p-1 font-print text-[12px] leading-relaxed text-ink shadow-sm print:shadow-none">
+      <div className="relative flex flex-1 flex-col border border-teal-900/60 px-6 py-5">
         {/* watermark */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.045]" aria-hidden>
           <ClinicLogo size={300} />

@@ -347,16 +347,9 @@ export function TreatmentSection({
             <button
               onClick={() => closeVisit("cash")}
               disabled={pending}
-              className="btn-primary px-4 py-2"
+              className="btn-primary px-5 py-2"
             >
-              ปิด visit · เงินสด {baht(total)} ฿
-            </button>
-            <button
-              onClick={() => closeVisit("transfer")}
-              disabled={pending}
-              className="btn px-4 py-2 border border-teal-700 text-teal-800 hover:bg-teal-50"
-            >
-              ปิด visit · เงินโอน
+              ปิด visit · {baht(total)} ฿
             </button>
           </div>
         </div>
