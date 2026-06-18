@@ -24,8 +24,15 @@ export function AppointmentDoc({
       meta={[{ label: "วันที่ออกใบนัด", value: thaiDate(todayISO()) }]}
       signature={{ role: "แพทย์ผู้นัด", name: doctorName }}
       footnote={
-        "กรุณานำใบนัดนี้มาด้วยทุกครั้งที่มารับการตรวจ" +
-        (clinic.phone ? ` · หากไม่สะดวกมาตามนัด กรุณาติดต่อ โทร. ${clinic.phone}` : "")
+        <>
+          กรุณานำใบนัดนี้มาด้วยทุกครั้งที่มารับการตรวจ
+          {clinic.phone && (
+            <>
+              <br />
+              หากไม่สะดวกมาตามนัด กรุณาติดต่อ โทร. {clinic.phone}
+            </>
+          )}
+        </>
       }
     >
       <div className="mb-5 grid grid-cols-[1fr_auto] gap-x-6 gap-y-1.5">

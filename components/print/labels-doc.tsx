@@ -56,45 +56,48 @@ export function LabelsDoc({
       {labels.map((l) => (
         <div
           key={l.key}
-          className="flex h-[45mm] w-[62mm] flex-col overflow-hidden rounded-[2px] border border-teal-900 bg-white px-[3mm] py-[2mm] font-print text-ink [print-color-adjust:exact] [break-inside:avoid]"
+          className="flex h-[45mm] w-[62mm] flex-col overflow-hidden rounded-[2px] border border-teal-900 bg-white font-print text-ink [print-color-adjust:exact] [break-inside:avoid]"
         >
-          <div className="flex items-center gap-1.5 border-b border-teal-900/40 pb-[1mm]">
-            <ClinicLogo size={16} variant="mark" className="shrink-0 text-teal-900" />
-            <span className="truncate text-[8px] font-bold tracking-wide text-teal-900">{clinic.name}</span>
-            {clinic.phone && <span className="ml-auto shrink-0 text-[7px] text-ink-soft">โทร. {clinic.phone}</span>}
+          {/* green letterhead strip (full-bleed), gold rule underneath */}
+          <div className="flex items-center gap-1.5 border-b-2 border-[#c8a24a] bg-teal-900 px-[3mm] py-[1.5mm]">
+            <ClinicLogo size={15} variant="mark" className="shrink-0 text-[#d8b765]" />
+            <span className="truncate text-[8px] font-bold tracking-wide text-white">{clinic.name}</span>
+            {clinic.phone && <span className="ml-auto shrink-0 text-[7px] text-white/80">โทร. {clinic.phone}</span>}
           </div>
 
-          <div className="mt-[1mm] flex items-baseline justify-between text-[8px] text-ink-soft">
-            <span className="truncate">
-              <span className="font-semibold tabular-nums text-teal-700">{patient.hn}</span> {name}
-            </span>
-            <span className="shrink-0 tabular-nums">{date}</span>
-          </div>
-
-          <p className="mt-[1mm] truncate text-[12px] font-bold leading-tight text-teal-900">{l.drug}</p>
-
-          {l.indication && (
-            <p className="mt-[0.5mm] line-clamp-2 text-[9px] leading-snug text-ink-soft">
-              <span className="font-medium text-ink">สรรพคุณ:</span> {l.indication}
-            </p>
-          )}
-
-          <div className="mt-[1mm] flex-1 overflow-hidden">
-            <p className="text-[8px] font-medium text-ink-soft">วิธีใช้</p>
-            <p className="text-[11px] leading-snug">{l.instructions || "—"}</p>
-          </div>
-
-          <div className="mt-[1mm] flex items-end justify-between gap-1 text-[7px]">
-            {patient.allergies ? (
-              <span className="truncate font-medium text-danger">⚠ แพ้: {patient.allergies}</span>
-            ) : (
-              <span />
-            )}
-            {l.packetTotal > 1 && (
-              <span className="shrink-0 text-ink-soft">
-                ซองที่ {l.packetIndex}/{l.packetTotal}
+          <div className="flex flex-1 flex-col px-[3mm] py-[1.5mm]">
+            <div className="flex items-baseline justify-between text-[8px] text-ink-soft">
+              <span className="truncate">
+                <span className="font-semibold tabular-nums text-teal-700">{patient.hn}</span> {name}
               </span>
+              <span className="shrink-0 tabular-nums">{date}</span>
+            </div>
+
+            <p className="mt-[1mm] truncate text-[12px] font-bold leading-tight text-teal-900">{l.drug}</p>
+
+            {l.indication && (
+              <p className="mt-[0.5mm] line-clamp-2 text-[9px] leading-snug text-ink-soft">
+                <span className="font-medium text-ink">สรรพคุณ:</span> {l.indication}
+              </p>
             )}
+
+            <div className="mt-[1mm] flex-1 overflow-hidden">
+              <p className="text-[8px] font-medium text-ink-soft">วิธีใช้</p>
+              <p className="text-[11px] leading-snug">{l.instructions || "—"}</p>
+            </div>
+
+            <div className="mt-[1mm] flex items-end justify-between gap-1 text-[7px]">
+              {patient.allergies ? (
+                <span className="truncate font-medium text-danger">⚠ แพ้: {patient.allergies}</span>
+              ) : (
+                <span />
+              )}
+              {l.packetTotal > 1 && (
+                <span className="shrink-0 text-ink-soft">
+                  ซองที่ {l.packetIndex}/{l.packetTotal}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       ))}

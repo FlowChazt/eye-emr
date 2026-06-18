@@ -24,7 +24,7 @@ export function PrintDoc({
   meta?: { label: string; value: string }[];
   children: ReactNode;
   signature?: { role: string; name?: string };
-  footnote?: string;
+  footnote?: ReactNode;
 }) {
   return (
     <div className="print-doc relative overflow-hidden border-2 border-teal-900 bg-white p-1 font-print text-[12px] leading-relaxed text-ink shadow-sm print:shadow-none">
