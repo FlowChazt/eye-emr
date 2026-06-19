@@ -128,12 +128,16 @@ del "%TEMP%\eye-src.zip" >nul 2>&1
 rmdir /S /Q "%TEMP%\eye-src" >nul 2>&1
 
 REM --- 8. install deps + build + standalone post-build copies ---
+REM Run npm from inside %APP% (cwd-based): the elevated window starts in
+REM System32, and "npm --prefix" does not reliably switch the package dir.
 echo.
 echo Installing dependencies ^(fetches the prebuilt better-sqlite3^)...
-call "%NPM%" install --prefix "%APP%" || goto :fail
+pushd "%APP%"
+call "%NPM%" install || ( popd & goto :fail )
 echo.
 echo Building production bundle...
-call "%NPM%" run build --prefix "%APP%" || goto :fail
+call "%NPM%" run build || ( popd & goto :fail )
+popd
 echo.
 echo Copying static assets into the standalone bundle...
 xcopy /E /I /Y "%APP%\.next\static" "%APP%\.next\standalone\.next\static" >nul || goto :fail
@@ -146,7 +150,9 @@ echo.
 if not exist "%DATA%\clinic.db" (
   echo Seeding a fresh database at %DATA%\clinic.db ...
   set "DB_PATH=%DATA%\clinic.db"
-  call "%NPM%" run seed --prefix "%APP%" || goto :fail
+  pushd "%APP%"
+  call "%NPM%" run seed || ( popd & goto :fail )
+  popd
   echo   default login: eye / eyeclinic  ^(CHANGE IT after first login^)
 ) else (
   echo Database already exists - leaving it untouched.
