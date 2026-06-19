@@ -33,6 +33,12 @@ context. Most recent first.
 - **Rollout (manual, by dev):** push, `gh repo edit FlowChazt/eye-emr --visibility
   public`, then `gh release create vX.Y.Z` for each version (first release must
   exist before setup works). Deploy scripts must stay **CRLF**.
+- **Verified working on the clinic PC (v1.0.1).** Two fixes during the live run:
+  (1) run npm from inside `%APP%` via `pushd`, not `npm --prefix` — the elevated
+  console starts in `System32`, where `--prefix` left npm reading
+  `System32\package.json` (ENOENT); (2) the setup `.bat` can't self-update, so a
+  changed installer requires re-downloading the `.bat` (the raw `master` link).
+  App updates flow through releases and need no `.bat` re-download.
 
 ## 2026-06-18 — Visit QOL, drug labels, procedures, print overhaul
 

@@ -38,18 +38,28 @@ double-clicks an icon, and other PCs on the same network open it in a browser
 
 ## Shipping an update (developer — chakrit)
 
-The clinic only ever pulls **published GitHub Releases**, so a mid-development
-push to `master` can't reach it. To ship a version:
+There are two kinds of change, and they reach the clinic differently:
+
+**1. App changes (the normal case).** The clinic only pulls **published GitHub
+Releases**, so a mid-development push to `master` can't reach it. To ship:
 
 ```bash
-gh release create v1.0.1 -t "v1.0.1" -n "What changed"
+git push                                   # land the change on master
+gh release create v1.0.2 -t "v1.0.2" -n "What changed"
 ```
 
-That's it — next time the clinic runs `eye-clinic-setup.bat` it picks up
-`v1.0.1`. (The very first release **must exist** before the setup file works.)
+Next time the clinic runs `eye-clinic-setup.bat` it sees `v1.0.2`, re-downloads,
+and rebuilds. The DB and settings are untouched. (The very first release **must
+exist** before the setup file works at all.)
 
-If you ever change `eye-clinic-setup.bat` itself, re-download the file to the
-clinic PC (the setup file is not auto-updated).
+**2. Changes to `eye-clinic-setup.bat` itself.** The setup file **cannot update
+itself** — the copy on the clinic PC is whatever was last downloaded. After
+changing the installer logic, **re-download the `.bat`** to the clinic PC (raw
+link above) and run that. App releases do *not* require re-downloading the `.bat`.
+
+> Always end-of-line **CRLF** for the deploy scripts (`.bat`/`.vbs`/`.ps1`). An
+> LF-only `.bat` flashes open and closes instantly on Windows. After editing one
+> with a Unix tool, normalize: `sed -i 's/\r$//' f && sed -i 's/$/\r/' f`.
 
 ## Keep the URL stable
 
@@ -97,3 +107,8 @@ note for the clinic.
 - **Forgot the admin password** — re-seeding only runs on an empty DB, so reset
   it from the app while logged in, or ask the developer.
 - **SmartScreen blocks the .bat** — *More info → Run anyway* (it's unsigned).
+- **`npm error … C:\Windows\System32\package.json` (ENOENT)** — your local
+  `eye-clinic-setup.bat` is an old version. Re-download it (raw link above) and
+  run the fresh copy.
+- **Setup window flashed and closed instantly** — the `.bat` lost its CRLF line
+  endings (e.g. edited/saved by a tool that strips them). Re-download it.

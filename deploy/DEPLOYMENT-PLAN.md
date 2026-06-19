@@ -1,6 +1,6 @@
 # Deployment Plan — Eye EMR on a Windows clinic PC
 
-> Status: **one-file bootstrapper (2026-06-19).** The multi-step
+> Status: **DEPLOYED & WORKING on the clinic PC (2026-06-19).** The multi-step
 > `install.bat`/`update.bat` were replaced by a single self-elevating
 > **`deploy/windows/eye-clinic-setup.bat`** that the user double-clicks: first
 > run installs, re-run updates from the latest **GitHub Release**. It bundles a
@@ -8,8 +8,16 @@
 > keeps all per-machine state under `C:\ClinicData` (DB, `config.bat`,
 > `installed-version.txt`), prompts for **port (default 3000)** and **autostart**
 > on first install, and creates an **"Eye Clinic"** icon from the logo
-> (`eye-clinic.ico`). Repo is **public** so downloads need no token. See
+> (`eye-clinic.ico`). Repo is **public** so downloads need no token. First
+> releases cut: `v1.0.0`, then `v1.0.1` (the install fix below). See
 > `deploy/windows/README.md` for the install/update + release-cutting workflow.
+>
+> Two fixes found during the live run: (1) npm must run from **inside `%APP%`**
+> (`pushd`), not via `npm --prefix` — the elevated console starts in System32 and
+> `--prefix` left npm reading `System32\package.json` (ENOENT). (2) The setup
+> `.bat` **cannot update itself**; the clinic PC kept running its stale local copy
+> until it was re-downloaded from the raw link. Both documented in the README.
+>
 > The historical step-by-step below describes the original (now superseded)
 > two-script kit and remains accurate for the standalone-build internals.
 
