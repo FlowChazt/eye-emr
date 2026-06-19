@@ -7,17 +7,19 @@
 ' opens the browser again instead of starting a second copy.
 '
 ' Per-machine settings (DB location, port, secret) are read from
-' config.bat in this same folder, which install.bat generates once.
+' C:\ClinicData\config.bat, which the setup bootstrapper generates once.
 ' ==========================================================================
 Option Explicit
 
-Dim fso, shell, here, root, standalone, cfg
+Dim fso, shell, here, root, base, standalone, cfg
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set shell = CreateObject("WScript.Shell")
 
-' This script lives in <root>\deploy\windows\ ; app root is two levels up.
+' This script lives in <app>\deploy\windows\ ; app root is two levels up,
+' and the install base (which also holds the portable node\) is one more up.
 here = fso.GetParentFolderName(WScript.ScriptFullName)
-root = fso.GetParentFolderName(fso.GetParentFolderName(here))
+root = fso.GetParentFolderName(fso.GetParentFolderName(here))   ' C:\EyeClinic\app
+base = fso.GetParentFolderName(root)                            ' C:\EyeClinic
 standalone = fso.BuildPath(root, ".next\standalone")
 
 ' ---- load config.bat (KEY=VALUE lines, ignore "set " prefix & comments) ----
@@ -27,7 +29,7 @@ port = "3000"
 hostName = "0.0.0.0"
 secret = ""
 
-cfg = fso.BuildPath(here, "config.bat")
+cfg = "C:\ClinicData\config.bat"
 If fso.FileExists(cfg) Then
     Dim f, line, k, v, p
     Set f = fso.OpenTextFile(cfg, 1)
@@ -65,9 +67,13 @@ If Not PortInUse(port) Then
 
     ' Resolve node.exe by full path: a process launched from Explorer can have a
     ' stale PATH (e.g. set before Node was installed), so "node" alone may fail.
-    Dim nodeExe
+    ' Prefer the portable node the setup bootstrapper bundled at <base>\node.
+    Dim nodeExe, portableNode
     nodeExe = "node"
-    If fso.FileExists("C:\Program Files\nodejs\node.exe") Then
+    portableNode = fso.BuildPath(base, "node\node.exe")
+    If fso.FileExists(portableNode) Then
+        nodeExe = portableNode
+    ElseIf fso.FileExists("C:\Program Files\nodejs\node.exe") Then
         nodeExe = "C:\Program Files\nodejs\node.exe"
     ElseIf fso.FileExists("C:\Program Files (x86)\nodejs\node.exe") Then
         nodeExe = "C:\Program Files (x86)\nodejs\node.exe"

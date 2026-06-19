@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ClinicLogo } from "./clinic-logo";
+import { ClinicLogoImg } from "./clinic-logo-img";
 
 /**
  * Official A5 document frame shared by all printed papers: double-rule
@@ -30,13 +30,13 @@ export function PrintDoc({
     <div className="print-doc relative flex aspect-[148/210] w-full flex-col overflow-hidden border-2 border-teal-900 bg-white p-1 font-print text-[12px] leading-relaxed text-ink shadow-sm print:shadow-none">
       <div className="relative flex flex-1 flex-col border border-teal-900/60 px-6 py-5">
         {/* watermark */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.045]" aria-hidden>
-          <ClinicLogo size={300} />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.05]" aria-hidden>
+          <ClinicLogoImg size={300} />
         </div>
 
         {/* letterhead */}
         <header className="relative flex items-center gap-3">
-          <ClinicLogo size={52} className="shrink-0" />
+          <ClinicLogoImg size={52} className="shrink-0" />
           <div className="min-w-0">
             <p className="text-lg font-bold text-teal-900">{clinicName}</p>
             {clinicAddress && <p className="text-[11px] text-ink-soft">{clinicAddress}</p>}

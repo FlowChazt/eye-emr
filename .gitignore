@@ -45,5 +45,12 @@ data/
 *.png
 .playwright-mcp/
 
+# brand assets — keep tracked despite the *.png rule above
+!/public/clinic-logo.png
+!/public/clinic-logo-named.png
+!/logo/clinic.png
+!/logo/clinic2.png
+!/app/icon.png
+
 # Windows deploy: machine-generated secret/config, never commit
 deploy/windows/config.bat

@@ -1,12 +1,17 @@
 # Deployment Plan — Eye EMR on a Windows clinic PC
 
-> Status: **kit built (2026-06-14).** Step 1 (standalone build) is applied to
-> `next.config.ts` and verified to boot/migrate/seed on Linux here. The Windows
-> deploy kit (Steps 2–5) is written under `deploy/windows/`. What remains is the
-> actual one-time setup *on the clinic Windows PC* (run `install.bat`) — see
-> `deploy/windows/README.md`. Decisions taken for the open questions: port
-> **3000**, **Edge/Chrome app-mode** browser with default-browser fallback,
-> **autostart yes** (Startup shortcut), **install.bat** (no Inno Setup).
+> Status: **one-file bootstrapper (2026-06-19).** The multi-step
+> `install.bat`/`update.bat` were replaced by a single self-elevating
+> **`deploy/windows/eye-clinic-setup.bat`** that the user double-clicks: first
+> run installs, re-run updates from the latest **GitHub Release**. It bundles a
+> **portable Node** (`C:\EyeClinic\node`), puts the app at `C:\EyeClinic\app`,
+> keeps all per-machine state under `C:\ClinicData` (DB, `config.bat`,
+> `installed-version.txt`), prompts for **port (default 3000)** and **autostart**
+> on first install, and creates an **"Eye Clinic"** icon from the logo
+> (`eye-clinic.ico`). Repo is **public** so downloads need no token. See
+> `deploy/windows/README.md` for the install/update + release-cutting workflow.
+> The historical step-by-step below describes the original (now superseded)
+> two-script kit and remains accurate for the standalone-build internals.
 
 ## Goal & decisions (confirmed with the user)
 

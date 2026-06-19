@@ -3,6 +3,37 @@
 Running notes on non-obvious features so the next person (or future Claude) has
 context. Most recent first.
 
+## 2026-06-19 — Official logo + one-file Windows installer
+
+### Logo integration
+- Official logo art added under `logo/` (kept tracked via `.gitignore`
+  negations, since `*.png` is globally ignored). Cropped to content bounds and
+  flat-tinted to theme teal-900 (`#06322c`) with `sharp`, producing
+  `public/clinic-logo-named.png` (with clinic name, login screen) and
+  `public/clinic-logo.png` (emblem-only mark, everywhere else).
+- New `components/clinic-logo-img.tsx` (`ClinicLogoImg`, `variant="mark"|"named"`,
+  `size` = height, width from intrinsic ratio) renders the raster logo. Wired into
+  login, the app header, and `PrintDoc` letterhead + watermark (receipt +
+  appointment). The medication **label keeps the old SVG `ClinicLogo` mark**
+  (too small for the detailed logo) — `clinic-logo.tsx` stays for that one use.
+- Browser favicon refreshed: `app/icon.png` (256) + regenerated `app/favicon.ico`
+  from the mark on white; stale `app/icon.svg` removed.
+
+### One-file Windows installer/updater
+- Replaced `install.bat` + `update.bat` with a single self-elevating
+  **`deploy/windows/eye-clinic-setup.bat`**. Copy it to the PC, double-click:
+  first run installs, re-run updates. Pulls **GitHub Releases** (repo is public),
+  bundles **portable Node** (`C:\EyeClinic\node`), app at `C:\EyeClinic\app`
+  (re-extracted each update). All per-machine state moved to `C:\ClinicData`
+  (`config.bat`/`SESSION_SECRET`, `clinic.db`, `installed-version.txt`) so updates
+  can replace code wholesale. First install prompts **port (default 3000)** +
+  **autostart**. Program/shortcut renamed **"Eye Clinic"** with
+  `deploy/windows/eye-clinic.ico` (from the logo mark). `run-clinic.vbs`,
+  `stop-clinic.vbs`, `backup-clinic.ps1` updated for the new paths + portable node.
+- **Rollout (manual, by dev):** push, `gh repo edit FlowChazt/eye-emr --visibility
+  public`, then `gh release create vX.Y.Z` for each version (first release must
+  exist before setup works). Deploy scripts must stay **CRLF**.
+
 ## 2026-06-18 — Visit QOL, drug labels, procedures, print overhaul
 
 ### Reopen a closed visit (same-day only)

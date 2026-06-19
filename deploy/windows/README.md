@@ -1,75 +1,99 @@
-# Eye EMR — Windows setup (one-time, for chakrit)
+# Eye Clinic — Windows setup
 
-This folder packages the clinic EMR so the clinic PC runs it as a little web
-server, and your girlfriend just double-clicks an icon. Other PCs on the same
-network open it in a browser — no install on those.
+The clinic PC runs Eye Clinic as a small web server; your girlfriend just
+double-clicks an icon, and other PCs on the same network open it in a browser
+(no install on those). Everything is driven by **one file**:
+`eye-clinic-setup.bat`.
 
-> ⚠️ Run everything below **on the Windows PC itself.** Don't build from WSL —
-> `better-sqlite3` is a native module and needs the Windows binary, which
-> `npm install` downloads automatically on Windows (no compiler needed).
+## Install (and update) — one file does both
 
-## One-time setup
-
-1. **Install Node LTS** — download the Windows installer from
-   <https://nodejs.org> and run it (defaults are fine). Reboot if it asks.
-2. **Copy the project** to `C:\eye-emr` (the whole repo folder).
-3. **Run the installer as admin** — open `C:\eye-emr\deploy\windows\`,
-   right-click **`install.bat`** → **Run as administrator**. It will:
-   - create `C:\ClinicData\` (the database lives here) and `backups\`
-   - generate a one-time `SESSION_SECRET` into `config.bat`
-   - `npm install` → `npm run build` → copy static assets into the bundle
-   - seed a fresh database (admin login **eye / eyeclinic**)
-   - make a **desktop icon** + Start-menu entry + **autostart on boot**
-   - open the firewall on **port 3000** for LAN access
-   - register a **daily backup at 23:00**
-   Wait for it to print `DONE`.
-4. **Test locally** — double-click the new desktop icon **"โปรแกรมคลินิก"**.
-   A browser window should open at `http://localhost:3000`.
-5. **Log in** as `eye` / `eyeclinic`, then **immediately**:
+1. Get the setup file onto the clinic PC. Either copy
+   `deploy\windows\eye-clinic-setup.bat` from the project, or download it:
+   <https://raw.githubusercontent.com/FlowChazt/eye-emr/master/deploy/windows/eye-clinic-setup.bat>
+2. **Double-click it.** It asks for Administrator (click *Yes*). If Windows
+   SmartScreen warns about the `.bat`, click **More info → Run anyway**.
+3. **First run** asks two quick questions (just press Enter for the defaults):
+   - **Port** — default **3000**.
+   - **Start automatically when the PC turns on?** — default **Yes**.
+   Then it does everything by itself:
+   - downloads a portable Node into `C:\EyeClinic\node`
+   - downloads the latest Eye Clinic release from GitHub into `C:\EyeClinic\app`
+   - builds it, creates `C:\ClinicData\` (database + `backups\`), seeds a fresh
+     DB (admin login **eye / eyeclinic**)
+   - makes a desktop / Start-menu **"Eye Clinic"** icon (+ autostart if chosen)
+   - opens the firewall on the chosen port and registers a daily 23:00 backup
+4. **Launch** with the new **"Eye Clinic"** desktop icon — a browser opens at
+   `http://localhost:<port>`.
+5. **Log in** as `eye` / `eyeclinic`, then immediately:
    - change the password in **ตั้งค่า → เปลี่ยนรหัสผ่าน**
    - set the real **clinic name / address / phone** (these print on receipts)
 6. **Test from another PC** — on the server PC run `ipconfig`, note the IPv4
-   address (e.g. `192.168.1.50`), then on another PC's browser go to
-   `http://192.168.1.50:3000`. Make a desktop shortcut / bookmark there.
+   address (e.g. `192.168.1.50`), then browse `http://192.168.1.50:<port>` from
+   another PC and bookmark it.
+
+> **Running it again = update.** Re-run `eye-clinic-setup.bat` any time. It
+> checks GitHub for a newer release; if there is one it rebuilds in place. If
+> you're already current it says so and exits. It **never** touches
+> `C:\ClinicData` (patient data) or your saved settings/`SESSION_SECRET`.
+
+## Shipping an update (developer — chakrit)
+
+The clinic only ever pulls **published GitHub Releases**, so a mid-development
+push to `master` can't reach it. To ship a version:
+
+```bash
+gh release create v1.0.1 -t "v1.0.1" -n "What changed"
+```
+
+That's it — next time the clinic runs `eye-clinic-setup.bat` it picks up
+`v1.0.1`. (The very first release **must exist** before the setup file works.)
+
+If you ever change `eye-clinic-setup.bat` itself, re-download the file to the
+clinic PC (the setup file is not auto-updated).
 
 ## Keep the URL stable
 
-Give the server PC a fixed LAN IP so the address never changes — either set a
-static IP in Windows network settings, or add a DHCP reservation by MAC on the
-router. Write the IP on a sticky note for the clinic.
+Give the server PC a fixed LAN IP so the address never changes — a static IP in
+Windows, or a DHCP reservation by MAC on the router. Write the IP on a sticky
+note for the clinic.
 
 ## Backups
 
-- Automatic: every night at **23:00** → `C:\ClinicData\backups\clinic-<date>.db`,
-  keeping the last **30 days** (Task Scheduler task "Eye EMR Backup").
-- To back up right now: right-click `backup-clinic.ps1` → Run with PowerShell,
-  or run the scheduled task manually from Task Scheduler.
+- Automatic: every night at **23:00** →
+  `C:\ClinicData\backups\clinic-<date>.db`, keeping the last **30 days**
+  (Task Scheduler task "Eye EMR Backup").
+- Back up now: right-click `C:\EyeClinic\app\deploy\windows\backup-clinic.ps1`
+  → Run with PowerShell, or run the scheduled task from Task Scheduler.
 - Worth doing occasionally: copy the `backups\` folder to a USB stick / cloud.
 
-## Shipping a code update later
+## Where things live
 
-1. Replace the files in `C:\eye-emr` with the new version (`git pull`, or copy
-   the new project over the old — **never delete `C:\ClinicData`**).
-2. Right-click **`update.bat`** → Run as administrator. It rebuilds without
-   touching the database or your `SESSION_SECRET`. New DB migrations run
-   automatically the next time the app starts.
+| Path | What |
+|------|------|
+| `C:\EyeClinic\app` | the app code + built bundle (replaced on every update) |
+| `C:\EyeClinic\node` | bundled portable Node (reused across updates) |
+| `C:\ClinicData\clinic.db` | **the patient database** — never deleted |
+| `C:\ClinicData\backups\` | nightly backups |
+| `C:\ClinicData\config.bat` | auto-generated `PORT` / `SESSION_SECRET` / etc. |
+| `C:\ClinicData\installed-version.txt` | which release is installed |
 
 ## Files in this folder
 
 | File | What it does |
 |------|--------------|
-| `install.bat` | One-time setup (run as admin). |
-| `run-clinic.vbs` | The launcher the icon points at — starts the server hidden, opens the browser. |
-| `stop-clinic.vbs` | Double-click to stop the server (asks to confirm first). |
+| `eye-clinic-setup.bat` | **The one file.** Installs on first run, updates on re-run. |
+| `run-clinic.vbs` | What the icon points at — starts the server hidden, opens the browser. |
+| `stop-clinic.vbs` | Double-click to stop the server (confirms first). |
 | `backup-clinic.ps1` | Daily DB backup with 30-day retention. |
-| `update.bat` | Rebuild after a code update (run as admin). |
-| `config.bat` | **Auto-generated** by install.bat — holds `DB_PATH`, `PORT`, `SESSION_SECRET`. Don't edit by hand; don't commit. |
+| `eye-clinic.ico` | The "Eye Clinic" program/shortcut icon (from the logo). |
 
 ## Troubleshooting
 
-- **Port 3000 already in use** — change `PORT` in `config.bat` (and re-run the
-  firewall line, or just edit the existing "Eye EMR" rule) then relaunch.
-- **Nothing opens** — make sure Node is installed (`node -v` in a terminal) and
-  that `install.bat` finished with `DONE`. Check `C:\ClinicData\clinic.db` exists.
-- **Forgot the admin password** — re-seeding would only run on an empty DB, so
-  instead reset it from the app while logged in, or ask the developer.
+- **Port already in use** — re-run setup is not enough (it keeps the saved
+  port). Edit `PORT` in `C:\ClinicData\config.bat`, update the firewall rule
+  (or edit the existing "Eye EMR" rule), then relaunch.
+- **Nothing opens** — confirm `C:\ClinicData\clinic.db` exists and that setup
+  finished with the summary box. Check `C:\EyeClinic\app\.next\standalone\server.log`.
+- **Forgot the admin password** — re-seeding only runs on an empty DB, so reset
+  it from the app while logged in, or ask the developer.
+- **SmartScreen blocks the .bat** — *More info → Run anyway* (it's unsigned).

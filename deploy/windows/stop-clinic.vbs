@@ -6,16 +6,14 @@
 ' ==========================================================================
 Option Explicit
 
-Dim fso, shell, here, cfg
+Dim fso, shell, cfg
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set shell = CreateObject("WScript.Shell")
 
-here = fso.GetParentFolderName(WScript.ScriptFullName)
-
-' ---- read PORT from config.bat (default 3000) ----
+' ---- read PORT from C:\ClinicData\config.bat (default 3000) ----
 Dim port
 port = "3000"
-cfg = fso.BuildPath(here, "config.bat")
+cfg = "C:\ClinicData\config.bat"
 If fso.FileExists(cfg) Then
     Dim f, line, p
     Set f = fso.OpenTextFile(cfg, 1)

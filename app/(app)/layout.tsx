@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/session";
 import { logout } from "@/app/login/actions";
 import { NavLink } from "@/components/nav-link";
 import { GlobalSearch } from "@/components/global-search";
-import { ClinicLogo } from "@/components/clinic-logo";
+import { ClinicLogoImg } from "@/components/clinic-logo-img";
 import {
   WorklistIcon,
   PatientsIcon,
@@ -33,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 lg:gap-5 lg:px-6">
           <Link href="/" className="flex shrink-0 items-center gap-2.5">
-            <ClinicLogo size={30} className="shrink-0" />
+            <ClinicLogoImg size={30} className="shrink-0" />
             <span className="hidden text-[15px] leading-tight font-bold whitespace-nowrap text-teal-900 lg:inline">
               {clinicName}
             </span>

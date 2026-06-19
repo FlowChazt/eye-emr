@@ -17,9 +17,10 @@ $Db            = Join-Path $DataDir 'clinic.db'
 $BackupDir     = Join-Path $DataDir 'backups'
 $RetentionDays = 30
 
-# app root = two levels up from this script (deploy\windows\ -> root)
+# app root = two levels up from this script (deploy\windows\ -> C:\EyeClinic\app)
 $Root       = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $Standalone = Join-Path $Root '.next\standalone'
+$NodeExe    = Join-Path (Split-Path -Parent $Root) 'node\node.exe'  # bundled portable node
 
 if (-not (Test-Path $Db)) { Write-Host "No database at $Db - nothing to back up."; exit 0 }
 if (-not (Test-Path $BackupDir)) { New-Item -ItemType Directory -Path $BackupDir | Out-Null }
@@ -38,8 +39,9 @@ db.close();
 "@
     $tmpJs = Join-Path $env:TEMP 'eye-emr-backup.js'
     Set-Content -Path $tmpJs -Value $node -Encoding ASCII
+    $nodeCmd = if (Test-Path $NodeExe) { $NodeExe } else { 'node' }
     Push-Location $Standalone
-    & node $tmpJs $Db $target
+    & $nodeCmd $tmpJs $Db $target
     Pop-Location
     if (Test-Path $target) { $ok = $true }
 } catch {
