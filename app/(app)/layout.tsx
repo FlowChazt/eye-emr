@@ -6,6 +6,7 @@ import { logout } from "@/app/login/actions";
 import { NavLink } from "@/components/nav-link";
 import { GlobalSearch } from "@/components/global-search";
 import { ClinicLogoImg } from "@/components/clinic-logo-img";
+import { RealtimeProvider } from "@/components/realtime-provider";
 import {
   WorklistIcon,
   PatientsIcon,
@@ -27,8 +28,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const clinicName =
     db.select().from(tables.settings).where(eq(tables.settings.key, "clinic_name")).get()?.value ||
     "Eye Clinic";
+  const meRow = db.select().from(tables.users).where(eq(tables.users.id, user.userId)).get();
 
   return (
+    <RealtimeProvider
+      myUserId={user.userId}
+      myName={user.displayName}
+      notifyNewVisit={meRow?.notifyNewVisit ?? true}
+      notifySound={meRow?.notifySound ?? true}
+    >
     <div className="min-h-screen">
       <header className="no-print sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 lg:gap-5 lg:px-6">
@@ -68,5 +76,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <main className="mx-auto max-w-6xl p-4 lg:p-6">{children}</main>
     </div>
+    </RealtimeProvider>
   );
 }

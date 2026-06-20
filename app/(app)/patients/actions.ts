@@ -5,8 +5,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db, tables } from "@/db";
 import { nextHN } from "@/lib/counters";
-import { parseDobParts, todayISO } from "@/lib/format";
+import { fullName, parseDobParts, todayISO } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { notifyNewVisit } from "@/lib/realtime";
 
 function patientFromForm(formData: FormData) {
   const get = (k: string) => {
@@ -147,6 +148,11 @@ export async function openVisitForPatient(patientId: number, fromAppointmentId?:
     return v;
   });
   revalidatePath("/");
+
+  // push the new patient onto every open queue + fire the check-in toast
+  const patient = db.select().from(tables.patients).where(eq(tables.patients.id, patientId)).get();
+  notifyNewVisit(patient ? fullName(patient) : "ผู้ป่วยใหม่", user.userId);
+
   return visit.id;
 }
 

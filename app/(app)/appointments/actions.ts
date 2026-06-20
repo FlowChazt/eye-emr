@@ -5,12 +5,14 @@ import { revalidatePath } from "next/cache";
 import { db, tables } from "@/db";
 import { todayISO } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { notifyChanged } from "@/lib/realtime";
 
 function revalidateAppointmentViews(patientId: number, visitId: number | null) {
   revalidatePath("/");
   if (visitId) revalidatePath(`/visits/${visitId}`);
   const patient = db.select().from(tables.patients).where(eq(tables.patients.id, patientId)).get();
   if (patient) revalidatePath(`/patients/${patient.hn}`);
+  notifyChanged();
 }
 
 /** Schedule the patient's next appointment (typically from within a visit). */

@@ -7,6 +7,7 @@ import { db, tables } from "@/db";
 import { nextReceiptNo } from "@/lib/counters";
 import { todayISO } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { notifyChanged } from "@/lib/realtime";
 
 function numOrNull(v: FormDataEntryValue | null): number | null {
   const s = String(v ?? "").trim();
@@ -45,6 +46,7 @@ export async function saveVisitRecord(visitId: number, formData: FormData) {
 
   revalidatePath(`/visits/${visitId}`);
   revalidatePath("/");
+  notifyChanged();
 }
 
 /** Add a medication line item (price/name snapshotted from current stock). */
@@ -74,6 +76,7 @@ export async function addMedicationItem(visitId: number, medicationId: number, q
     .run();
 
   revalidatePath(`/visits/${visitId}`);
+  notifyChanged();
   return { ok: true };
 }
 
@@ -81,6 +84,14 @@ export async function addMedicationItem(visitId: number, medicationId: number, q
 export async function setAutoPrintOnClose(value: boolean) {
   const user = await requireUser();
   db.update(tables.users).set({ autoPrintOnClose: value }).where(eq(tables.users.id, user.userId)).run();
+  return { ok: true };
+}
+
+/** Per-user realtime preferences: new-patient popup and its sound. */
+export async function setNotifyPrefs(prefs: { notifyNewVisit?: boolean; notifySound?: boolean }) {
+  const user = await requireUser();
+  db.update(tables.users).set(prefs).where(eq(tables.users.id, user.userId)).run();
+  revalidatePath("/settings");
   return { ok: true };
 }
 
@@ -97,6 +108,7 @@ export async function setItemInstructions(visitId: number, itemId: number, instr
     .run();
 
   revalidatePath(`/visits/${visitId}`);
+  notifyChanged();
   return { ok: true };
 }
 
@@ -115,6 +127,7 @@ export async function addCustomItem(visitId: number, description: string, price:
     .run();
 
   revalidatePath(`/visits/${visitId}`);
+  notifyChanged();
   return { ok: true };
 }
 
@@ -125,6 +138,7 @@ export async function removeVisitItem(visitId: number, itemId: number) {
 
   db.delete(tables.visitItems).where(eq(tables.visitItems.id, itemId)).run();
   revalidatePath(`/visits/${visitId}`);
+  notifyChanged();
   return { ok: true };
 }
 
@@ -183,6 +197,7 @@ export async function completeVisit(visitId: number, method: "cash" | "transfer"
   revalidatePath(`/visits/${visitId}`);
   revalidatePath("/");
   revalidatePath("/stock");
+  notifyChanged();
 
   const u = db.select().from(tables.users).where(eq(tables.users.id, user.userId)).get();
   redirect(`/visits/${visitId}${u?.autoPrintOnClose ? "?printAll=1" : ""}`);
@@ -234,5 +249,6 @@ export async function reopenVisit(visitId: number) {
   revalidatePath(`/visits/${visitId}`);
   revalidatePath("/");
   revalidatePath("/stock");
+  notifyChanged();
   return { ok: true };
 }

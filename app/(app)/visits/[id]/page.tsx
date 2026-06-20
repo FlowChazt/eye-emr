@@ -11,6 +11,7 @@ import { HistoryPanel } from "./history-panel";
 import { NextAppointment } from "./next-appointment";
 import { ReopenButton } from "./reopen-button";
 import { PrintBar } from "./print-bar";
+import { VisitViewers } from "@/components/visit-viewers";
 
 type DocKind = "receipt" | "appointment" | "labels";
 
@@ -91,6 +92,7 @@ export default async function VisitPage({
 
   return (
     <div className="mx-auto max-w-4xl">
+      <VisitViewers visitId={visit.id} />
       <PatientBanner
         patient={patient}
         nameHref={`/patients/${patient.hn}`}

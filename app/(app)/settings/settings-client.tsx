@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { changePassword, createUser, saveClinicInfo, setUserActive } from "./actions";
+import { setNotifyPrefs } from "../visits/actions";
 
 const field = "field";
 
@@ -20,10 +21,12 @@ export function SettingsClient({
   settings,
   users,
   myUserId,
+  myPrefs,
 }: {
   settings: Record<string, string>;
   users: User[];
   myUserId: number;
+  myPrefs: { notifyNewVisit: boolean; notifySound: boolean };
 }) {
   const [clinicState, clinicAction, clinicPending] = useActionState(
     async (p: unknown, f: FormData) => saveClinicInfo(p, f),
@@ -39,8 +42,47 @@ export function SettingsClient({
   );
   const [, startToggle] = useTransition();
 
+  const [notifyNewVisit, setNotifyNewVisit] = useState(myPrefs.notifyNewVisit);
+  const [notifySound, setNotifySound] = useState(myPrefs.notifySound);
+  function saveNotify(next: { notifyNewVisit: boolean; notifySound: boolean }) {
+    startToggle(async () => void (await setNotifyPrefs(next)));
+  }
+
   return (
     <div className="space-y-5">
+      {/* realtime notifications (per-user) */}
+      <div className="card p-4">
+        <h2 className="mb-0.5 text-sm font-semibold tracking-wide text-ink-soft uppercase">การแจ้งเตือน</h2>
+        <p className="mb-3 text-xs text-ink-soft">เฉพาะบัญชีนี้ — รายการคิวจะอัปเดตอัตโนมัติเสมอ</p>
+        <label className="flex cursor-pointer items-center gap-2 py-1.5 text-sm text-ink-soft">
+          <input
+            type="checkbox"
+            checked={notifyNewVisit}
+            onChange={(e) => {
+              const v = e.target.checked;
+              setNotifyNewVisit(v);
+              saveNotify({ notifyNewVisit: v, notifySound });
+            }}
+            className="size-4 accent-teal-700"
+          />
+          แจ้งเตือน (pop-up) เมื่อมีผู้ป่วยใหม่เข้าคิว
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 py-1.5 text-sm text-ink-soft data-[off=true]:opacity-50" data-off={!notifyNewVisit}>
+          <input
+            type="checkbox"
+            checked={notifySound}
+            disabled={!notifyNewVisit}
+            onChange={(e) => {
+              const v = e.target.checked;
+              setNotifySound(v);
+              saveNotify({ notifyNewVisit, notifySound: v });
+            }}
+            className="size-4 accent-teal-700"
+          />
+          เล่นเสียงเตือนพร้อม pop-up
+        </label>
+      </div>
+
       {/* clinic info */}
       <form action={clinicAction} className="card p-4">
         <h2 className="mb-0.5 text-sm font-semibold tracking-wide text-ink-soft uppercase">ข้อมูลคลินิก</h2>

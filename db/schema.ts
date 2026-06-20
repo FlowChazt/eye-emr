@@ -10,6 +10,10 @@ export const users = sqliteTable("users", {
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   // when set, closing a visit auto-prints all of its documents
   autoPrintOnClose: integer("auto_print_on_close", { mode: "boolean" }).notNull().default(false),
+  // realtime: pop up a toast when another user checks in a new patient
+  notifyNewVisit: integer("notify_new_visit", { mode: "boolean" }).notNull().default(true),
+  // realtime: play a short sound alongside that toast
+  notifySound: integer("notify_sound", { mode: "boolean" }).notNull().default(true),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
 });
 

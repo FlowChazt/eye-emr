@@ -20,10 +20,16 @@ export default async function SettingsPage() {
     .orderBy(asc(tables.users.id))
     .all();
 
+  const meRow = db.select().from(tables.users).where(eq(tables.users.id, me.userId)).get();
+  const myPrefs = {
+    notifyNewVisit: meRow?.notifyNewVisit ?? true,
+    notifySound: meRow?.notifySound ?? true,
+  };
+
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="mb-4 text-lg font-bold text-teal-900">ตั้งค่า</h1>
-      <SettingsClient settings={settings} users={users} myUserId={me.userId} />
+      <SettingsClient settings={settings} users={users} myUserId={me.userId} myPrefs={myPrefs} />
     </div>
   );
 }
